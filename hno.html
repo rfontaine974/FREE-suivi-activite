@@ -16,6 +16,8 @@
         .nav-toggle i{transition:transform 220ms ease,color 220ms ease;font-size:18px;display:inline-block;line-height:1}
         .nav-toggle.open i{transform:rotate(90deg) scale(1.05);color:#fff}
         .title{font-size:1.5em;font-weight:900;margin:0;padding-left:20px;border-left:1px solid rgba(255,255,255,0.5)}
+        .header-link{color:#fff;text-decoration:none;font-weight:700;border:1px solid rgba(255,255,255,0.25);padding:8px 12px;border-radius:6px;display:none}
+        .header-link.show{display:inline-block}
         .container{width:90%;max-width:1100px;margin:20px auto}
         .card{background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
         .form-group{margin-bottom:12px}
@@ -94,6 +96,8 @@
             const icon = toggle.querySelector('i');
             const isOpen = toggle.classList.toggle('open');
             toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            const headerLink = document.querySelector('.header-link');
+            if(headerLink){ headerLink.classList.toggle('show', isOpen); }
             if(icon){
                 if(isOpen){ icon.classList.remove('fa-bars'); icon.classList.add('fa-times'); }
                 else { icon.classList.remove('fa-times'); icon.classList.add('fa-bars'); }
