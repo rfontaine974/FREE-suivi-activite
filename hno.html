@@ -52,6 +52,12 @@
         .todo-text{flex:1;font-size:0.9em;color:#333}
         .todo-delete{background:none;border:none;color:#dc3545;cursor:pointer;font-size:1.1em;padding:0 6px}
         .todo-delete:hover{color:#c82333}
+        /* Statut global du ticket */
+        .status-badge{padding:4px 10px;border-radius:12px;font-size:0.8em;font-weight:700;display:inline-block}
+        .status-a-prendre{background:#ffc107;color:#000}
+        .status-en-cours{background:#17a2b8;color:#fff}
+        .status-stagnant{background:#E80029;color:#fff}
+        .status-termine{background:#28a745;color:#fff}
     </style>
 </head>
 <body>
@@ -84,6 +90,17 @@
                         <input id="hnoDateLimiteMain" type="date">
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col form-group">
+                        <label for="hnoStatusTicketMain">Statut du Ticket</label>
+                        <select id="hnoStatusTicketMain">
+                            <option value="A prendre en charge">A prendre en charge</option>
+                            <option value="En cours">En cours</option>
+                            <option value="Stagnant">Stagnant</option>
+                            <option value="Terminé">Terminé</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="hnoDescMain">Description de l'Intervention</label>
                     <textarea id="hnoDescMain" rows="3" placeholder="Détails de l'intervention..."></textarea>
@@ -109,7 +126,7 @@
         <div class="card" style="margin-top:16px">
             <h3>Liste des Tickets HNO</h3>
             <div style="overflow-x:auto">
-                <table id="hnoTableMain"><thead><tr><th>Désignation</th><th>Code Site</th><th>Date Limite</th><th>Description</th><th>Todo</th><th>Actions</th></tr></thead><tbody id="hnoTableBodyMain"><tr><td colspan="6" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr></tbody></table>
+                <table id="hnoTableMain"><thead><tr><th>Désignation</th><th>Code Site</th><th>Date Limite</th><th>Statut</th><th>Description</th><th>Todo</th><th>Actions</th></tr></thead><tbody id="hnoTableBodyMain"><tr><td colspan="7" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr></tbody></table>
             </div>
         </div>
     </div>
@@ -132,6 +149,17 @@
                     <div class="col form-group">
                         <label for="editHNODateLimite">Date Limite Souhaitée</label>
                         <input id="editHNODateLimite" type="date">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col form-group">
+                        <label for="editHNOStatusTicket">Statut du Ticket</label>
+                        <select id="editHNOStatusTicket">
+                            <option value="A prendre en charge">A prendre en charge</option>
+                            <option value="En cours">En cours</option>
+                            <option value="Stagnant">Stagnant</option>
+                            <option value="Terminé">Terminé</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group">
@@ -173,23 +201,23 @@
         const HNO_KEY = 'suivi_hno_list_v1';
         function getList(){try{return JSON.parse(localStorage.getItem(HNO_KEY)||'[]')}catch(e){return[]}}
         function saveList(l){localStorage.setItem(HNO_KEY,JSON.stringify(l))}
-        function handleHNOFormMain(e){e.preventDefault();const designation=document.getElementById('hnoDesignationMain').value.trim();const site=document.getElementById('hnoSiteMain').value.trim();const dateLimite=document.getElementById('hnoDateLimiteMain').value;const desc=document.getElementById('hnoDescMain').value.trim();if(!designation||!site){alert('Désignation et Code Site requis');return}const item={id:Date.now(),designation,site,dateLimite:dateLimite||'',desc,todoList:[...currentTodoListMain]};const l=getList();l.unshift(item);saveList(l);render();resetHNOFormMain()}
-        function resetHNOFormMain(){document.getElementById('hnoFormMain').reset();document.getElementById('hnoDateLimiteMain').value='';document.getElementById('hnoDesignationMain').value='';document.getElementById('hnoSiteMain').value='';document.getElementById('hnoDescMain').value='';currentTodoListMain=[];renderTodoListMain()}
+        function handleHNOFormMain(e){e.preventDefault();const designation=document.getElementById('hnoDesignationMain').value.trim();const site=document.getElementById('hnoSiteMain').value.trim();const dateLimite=document.getElementById('hnoDateLimiteMain').value;const desc=document.getElementById('hnoDescMain').value.trim();const status=document.getElementById('hnoStatusTicketMain').value; if(!designation||!site){alert('Désignation et Code Site requis');return}const item={id:Date.now(),designation,site,dateLimite:dateLimite||'',desc,status:status||'A prendre en charge',todoList:[...currentTodoListMain]};const l=getList();l.unshift(item);saveList(l);render();resetHNOFormMain()}
+        function resetHNOFormMain(){document.getElementById('hnoFormMain').reset();document.getElementById('hnoDateLimiteMain').value='';document.getElementById('hnoDesignationMain').value='';document.getElementById('hnoSiteMain').value='';document.getElementById('hnoDescMain').value='';document.getElementById('hnoStatusTicketMain').value='A prendre en charge';currentTodoListMain=[];renderTodoListMain()}
         function addTodoTaskMain(){const input=document.getElementById('hnoTodoInputMain');const text=input.value.trim();if(!text)return;currentTodoListMain.push({text,status:'a-faire'});input.value='';renderTodoListMain()}
         function removeTodoTaskMain(index){currentTodoListMain.splice(index,1);renderTodoListMain()}
         function cycleTodoStatusMain(index){const statuses=['a-faire','en-cours','termine'];const current=currentTodoListMain[index].status;const idx=statuses.indexOf(current);currentTodoListMain[index].status=statuses[(idx+1)%3];renderTodoListMain()}
         function renderTodoListMain(){const container=document.getElementById('hnoTodoListMain');container.innerHTML='';if(!currentTodoListMain.length){container.innerHTML='<div style="text-align:center;color:#999;font-style:italic;padding:8px;">Aucune tâche ajoutée</div>';return}currentTodoListMain.forEach((task,idx)=>{const div=document.createElement('div');div.className='todo-item';const statusLabels={'a-faire':'À faire','en-cours':'En cours','termine':'Terminé'};div.innerHTML=`<span class="todo-status ${task.status}" onclick="cycleTodoStatusMain(${idx})">${statusLabels[task.status]}</span><span class="todo-text">${escapeHtml(task.text)}</span><button class="todo-delete" onclick="removeTodoTaskMain(${idx})">🗑️</button>`;container.appendChild(div)})}
-        function render(){const b=document.getElementById('hnoTableBodyMain');const l=getList();b.innerHTML='';if(!l.length){b.innerHTML='<tr><td colspan="6" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr>';return}l.forEach(it=>{const tr=document.createElement('tr');const dlFormatted=it.dateLimite?new Date(it.dateLimite).toLocaleDateString('fr-FR'):'N/A';const todoList=it.todoList||[];const todoCount=todoList.length;const todoDone=todoList.filter(t=>t.status==='termine').length;const todoPreview=todoCount>0?`${todoDone}/${todoCount} terminées`:'—';tr.innerHTML=`<td>${escapeHtml(it.designation||'')}</td><td>${escapeHtml(it.site)}</td><td>${dlFormatted}</td><td>${escapeHtml(it.desc)}</td><td style="font-style:italic;color:#666;">${todoPreview}</td><td class="actions"><button title="Supprimer" onclick="event.stopPropagation();deleteItem(${it.id})">🗑️</button></td>`;tr.onclick=()=>openEditModalHNO(it);b.appendChild(tr)})}
+        function render(){const b=document.getElementById('hnoTableBodyMain');const l=getList();b.innerHTML='';if(!l.length){b.innerHTML='<tr><td colspan="7" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr>';return}l.forEach(it=>{const tr=document.createElement('tr');const dlFormatted=it.dateLimite?new Date(it.dateLimite).toLocaleDateString('fr-FR'):'N/A';const todoList=it.todoList||[];const todoCount=todoList.length;const todoDone=todoList.filter(t=>t.status==='termine').length;const todoPreview=todoCount>0?`${todoDone}/${todoCount} terminées`:'—';const statusClass = (it.status||'A prendre en charge').toLowerCase();const statusMap = {'a prendre en charge':'status-a-prendre','en cours':'status-en-cours','stagnant':'status-stagnant','terminé':'status-termine'};const cls = statusMap[statusClass] || 'status-a-prendre';tr.innerHTML=`<td>${escapeHtml(it.designation||'')}</td><td>${escapeHtml(it.site)}</td><td>${dlFormatted}</td><td><span class="${cls} status-badge">${escapeHtml(it.status||'A prendre en charge')}</span></td><td>${escapeHtml(it.desc)}</td><td style="font-style:italic;color:#666;">${todoPreview}</td><td class="actions"><button title="Supprimer" onclick="event.stopPropagation();deleteItem(${it.id})">🗑️</button></td>`;tr.onclick=()=>openEditModalHNO(it);b.appendChild(tr)})}
         function deleteItem(id){if(!confirm('Supprimer ?'))return;saveList(getList().filter(x=>x.id!==id));render()}
         function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[ch])}
-        function exportHNOCsvMain(){const l=getList();if(!l.length){alert('Aucun HNO à exporter');return}const headers=['Designation','Code_Site','Date_Limite','Description','Todo_Tasks','Todo_Completed'];const rows=l.map(i=>{const todoList=i.todoList||[];const tasks=todoList.map(t=>`${t.text} [${t.status}]`).join('; ');const completed=todoList.filter(t=>t.status==='termine').length;return[i.designation||'',i.site,i.dateLimite||'',i.desc||'',tasks,`${completed}/${todoList.length}`]});const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""') }"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`hno_export_${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
-        function openEditModalHNO(item){document.getElementById('editHNOId').value=item.id;document.getElementById('editHNODesignation').value=item.designation||'';document.getElementById('editHNOSite').value=item.site||'';document.getElementById('editHNODateLimite').value=item.dateLimite||'';document.getElementById('editHNODesc').value=item.desc||'';currentTodoListEdit=item.todoList?JSON.parse(JSON.stringify(item.todoList)):[];renderTodoListEdit();document.getElementById('editModalHNO').style.display='block'}
+        function exportHNOCsvMain(){const l=getList();if(!l.length){alert('Aucun HNO à exporter');return}const headers=['Designation','Code_Site','Date_Limite','Statut','Description','Todo_Tasks','Todo_Completed'];const rows=l.map(i=>{const todoList=i.todoList||[];const tasks=todoList.map(t=>`${t.text} [${t.status}]`).join('; ');const completed=todoList.filter(t=>t.status==='termine').length;return[i.designation||'',i.site,i.dateLimite||'',i.status||'A prendre en charge',i.desc||'',tasks,`${completed}/${todoList.length}`]});const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""') }"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`hno_export_${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+        function openEditModalHNO(item){document.getElementById('editHNOId').value=item.id;document.getElementById('editHNODesignation').value=item.designation||'';document.getElementById('editHNOSite').value=item.site||'';document.getElementById('editHNODateLimite').value=item.dateLimite||'';document.getElementById('editHNODesc').value=item.desc||'';document.getElementById('editHNOStatusTicket').value=item.status||'A prendre en charge';currentTodoListEdit=item.todoList?JSON.parse(JSON.stringify(item.todoList)):[];renderTodoListEdit();document.getElementById('editModalHNO').style.display='block'}
         function closeEditModalHNO(){document.getElementById('editModalHNO').style.display='none'}
         function addTodoTaskEdit(){const input=document.getElementById('editTodoInputHNO');const text=input.value.trim();if(!text)return;currentTodoListEdit.push({text,status:'a-faire'});input.value='';renderTodoListEdit()}
         function removeTodoTaskEdit(index){currentTodoListEdit.splice(index,1);renderTodoListEdit()}
         function cycleTodoStatusEdit(index){const statuses=['a-faire','en-cours','termine'];const current=currentTodoListEdit[index].status;const idx=statuses.indexOf(current);currentTodoListEdit[index].status=statuses[(idx+1)%3];renderTodoListEdit()}
         function renderTodoListEdit(){const container=document.getElementById('editTodoListHNO');container.innerHTML='';if(!currentTodoListEdit.length){container.innerHTML='<div style="text-align:center;color:#999;font-style:italic;padding:8px;">Aucune tâche ajoutée</div>';return}currentTodoListEdit.forEach((task,idx)=>{const div=document.createElement('div');div.className='todo-item';const statusLabels={'a-faire':'À faire','en-cours':'En cours','termine':'Terminé'};div.innerHTML=`<span class="todo-status ${task.status}" onclick="cycleTodoStatusEdit(${idx})">${statusLabels[task.status]}</span><span class="todo-text">${escapeHtml(task.text)}</span><button class="todo-delete" onclick="removeTodoTaskEdit(${idx})">🗑️</button>`;container.appendChild(div)})}
-        function handleEditSubmitHNO(e){e.preventDefault();const id=parseInt(document.getElementById('editHNOId').value);const designation=document.getElementById('editHNODesignation').value.trim();const site=document.getElementById('editHNOSite').value.trim();const dateLimite=document.getElementById('editHNODateLimite').value;const desc=document.getElementById('editHNODesc').value.trim();if(!designation||!site){alert('Désignation et Code Site requis');return}const l=getList();const index=l.findIndex(it=>it.id===id);if(index!==-1){l[index]={...l[index],designation,site,dateLimite:dateLimite||'',desc,todoList:[...currentTodoListEdit]};saveList(l);render();closeEditModalHNO()}else{alert('Ticket introuvable')}}
+        function handleEditSubmitHNO(e){e.preventDefault();const id=parseInt(document.getElementById('editHNOId').value);const designation=document.getElementById('editHNODesignation').value.trim();const site=document.getElementById('editHNOSite').value.trim();const dateLimite=document.getElementById('editHNODateLimite').value;const desc=document.getElementById('editHNODesc').value.trim();const status=document.getElementById('editHNOStatusTicket').value; if(!designation||!site){alert('Désignation et Code Site requis');return}const l=getList();const index=l.findIndex(it=>it.id===id);if(index!==-1){l[index]={...l[index],designation,site,dateLimite:dateLimite||'',desc,status:status||'A prendre en charge',todoList:[...currentTodoListEdit]};saveList(l);render();closeEditModalHNO()}else{alert('Ticket introuvable')}}
         window.onclick=function(event){const modal=document.getElementById('editModalHNO');if(event.target==modal){closeEditModalHNO()}}
         document.addEventListener('DOMContentLoaded',render);
     </script>
