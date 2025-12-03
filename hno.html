@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Suivi HNO — Suivi d'intervention</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root { --free-primary: #E80029; --free-light-bg:#F5F5F5; }
+        body{font-family:Roboto,Arial,sans-serif;margin:0;background:var(--free-light-bg);color:#222}
+        header{background:var(--free-primary);color:#fff;padding:14px}
+        .container{width:90%;max-width:1100px;margin:20px auto}
+        .card{background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+        .form-group{margin-bottom:12px}
+        label{display:block;margin-bottom:6px;font-weight:600}
+        input,textarea,select{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px}
+        .row{display:flex;gap:12px;align-items:flex-start}
+        .col{flex:1}
+        .btn{background:var(--free-primary);color:#fff;padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+        .btn.secondary{background:#eee;color:#333}
+        table{width:100%;border-collapse:collapse;margin-top:12px}
+        th,td{padding:8px;border-bottom:1px solid #f0f0f0}
+        th{background:#fafafa;text-align:left}
+        .actions button{background:none;border:none;color:#c82333;cursor:pointer}
+    </style>
+</head>
+<body>
+    <header>
+        <div style="width:90%;max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:800">free — Suivi HNO</div>
+            <div><a href="/" style="color:#fff;text-decoration:underline">Retour</a></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Ajouter un HNO</h2>
+            <form id="hnoFormMain" onsubmit="handleHNOFormMain(event)">
+                <div class="row">
+                    <div class="col form-group">
+                        <label for="hnoDateMain">Date</label>
+                        <input id="hnoDateMain" type="date" required>
+                    </div>
+                    <div class="col form-group">
+                        <label for="hnoSiteMain">Code Site</label>
+                        <input id="hnoSiteMain" type="text" placeholder="Ex: S1-IDF" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="hnoDescMain">Description</label>
+                    <textarea id="hnoDescMain" rows="2"></textarea>
+                </div>
+                <div class="row">
+                    <div class="col form-group">
+                        <label for="hnoDurationMain">Durée (h)</label>
+                        <input id="hnoDurationMain" type="number" min="0" step="0.25">
+                    </div>
+                    <div class="col form-group">
+                        <label for="hnoStatusMain">Statut</label>
+                        <select id="hnoStatusMain"><option>En cours</option><option>Terminé</option><option>Annulé</option></select>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px">
+                    <button class="btn" type="submit">Ajouter</button>
+                    <button type="button" class="btn secondary" onclick="resetHNOFormMain()">Réinitialiser</button>
+                    <button type="button" class="btn secondary" onclick="exportHNOCsvMain()">Exporter CSV</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+            <h3>Liste HNO</h3>
+            <div style="overflow-x:auto">
+                <table id="hnoTableMain"><thead><tr><th>Date</th><th>Site</th><th>Description</th><th>Durée</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="hnoTableBodyMain"><tr><td colspan="6" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const HNO_KEY = 'suivi_hno_list_v1';
+        function getList(){try{return JSON.parse(localStorage.getItem(HNO_KEY)||'[]')}catch(e){return[]}}
+        function saveList(l){localStorage.setItem(HNO_KEY,JSON.stringify(l))}
+        function handleHNOFormMain(e){e.preventDefault();const d=document.getElementById('hnoDateMain').value;const s=document.getElementById('hnoSiteMain').value.trim();if(!d||!s){alert('Date et Site requis');return}const item={id:Date.now(),date:d,site:s,desc:document.getElementById('hnoDescMain').value||'',duration:document.getElementById('hnoDurationMain').value||'',status:document.getElementById('hnoStatusMain').value};const l=getList();l.unshift(item);saveList(l);render();resetHNOFormMain()}
+        function resetHNOFormMain(){document.getElementById('hnoFormMain').reset();document.getElementById('hnoDateMain').value=''}
+        function render(){const b=document.getElementById('hnoTableBodyMain');const l=getList();b.innerHTML='';if(!l.length){b.innerHTML='<tr><td colspan="6" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr>';return}l.forEach(it=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${it.date}</td><td>${escapeHtml(it.site)}</td><td>${escapeHtml(it.desc)}</td><td>${it.duration||''}</td><td>${it.status}</td><td class="actions"><button title="Supprimer" onclick="deleteItem(${it.id})">🗑️</button></td>`;b.appendChild(tr)})}
+        function deleteItem(id){if(!confirm('Supprimer ?'))return;saveList(getList().filter(x=>x.id!==id));render()}
+        function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[ch])}
+        function exportHNOCsvMain(){const l=getList();if(!l.length){alert('Aucun HNO à exporter');return}const headers=['Date','Site','Description','Duree_h','Statut'];const rows=l.map(i=>[i.date,i.site,i.desc,i.duration||'',i.status]);const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""') }"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`hno_export_${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+        document.addEventListener('DOMContentLoaded',render);
+    </script>
+</body>
+</html>

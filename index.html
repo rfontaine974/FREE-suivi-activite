@@ -615,61 +615,10 @@
             <div style="margin: 20px 0;">
                 <h3>Suivi des HNO</h3>
                 <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
-                    <form id="hnoForm" style="flex:1 1 420px; background: #fff; padding: 16px; border-radius:6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);" onsubmit="handleHNOForm(event)">
-                        <div class="form-group">
-                            <label for="hnoDate">Date</label>
-                            <input type="date" id="hnoDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="hnoSite">Code Site</label>
-                            <input type="text" id="hnoSite" placeholder="Ex: S1-IDF" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="hnoDesc">Description</label>
-                            <textarea id="hnoDesc" placeholder="Courte description"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="hnoDuration">Durée (h)</label>
-                            <input type="number" id="hnoDuration" min="0" step="0.25">
-                        </div>
-                        <div class="form-group">
-                            <label for="hnoStatus">Statut</label>
-                            <select id="hnoStatus">
-                                <option value="En cours">En cours</option>
-                                <option value="Terminé">Terminé</option>
-                                <option value="Annulé">Annulé</option>
-                            </select>
-                        </div>
-                        <div style="display:flex; gap:10px;">
-                            <button type="submit" class="form-submit-button" style="flex:1">Ajouter HNO</button>
-                            <button type="button" class="clear-btn" onclick="resetHNOForm()" style="flex:0">Réinitialiser</button>
-                        </div>
-                    </form>
-
-                    <div style="flex:2 1 560px; background:#fff; padding:16px; border-radius:6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <strong>Liste HNO</strong>
-                            <div>
-                                <button class="new-ticket-button" onclick="exportHNOCsv()">Exporter CSV</button>
-                            </div>
-                        </div>
-                        <div style="overflow-x:auto;">
-                            <table id="hnoTable" style="width:100%; border-collapse:collapse;">
-                                <thead>
-                                    <tr style="background:var(--free-primary); color:#fff;">
-                                        <th style="padding:8px;">Date</th>
-                                        <th style="padding:8px;">Site</th>
-                                        <th style="padding:8px;">Description</th>
-                                        <th style="padding:8px;">Durée (h)</th>
-                                        <th style="padding:8px;">Statut</th>
-                                        <th style="padding:8px;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="hnoTableBody">
-                                    <tr><td colspan="6" style="text-align:center; padding:12px; font-style:italic; color:#666;">Aucun HNO enregistré.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div style="flex:1 1 420px; background: #fff; padding: 16px; border-radius:6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                        <p>Le suivi des HNO a été déplacé vers une page dédiée.</p>
+                        <p><a class="new-ticket-button" href="/hno.html">Ouvrir le Suivi HNO</a></p>
+                        <p style="margin-top:10px; color:#666;">La page HNO permet d'ajouter, éditer, supprimer et exporter les enregistrements.</p>
                     </div>
                 </div>
             </div>
