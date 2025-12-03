@@ -73,6 +73,10 @@
                     <label for="hnoDescMain">Description de l'Intervention</label>
                     <textarea id="hnoDescMain" rows="3" placeholder="Détails de l'intervention..."></textarea>
                 </div>
+                <div class="form-group">
+                    <label for="hnoTodoMain">Todo Liste (une tâche par ligne)</label>
+                    <textarea id="hnoTodoMain" rows="4" placeholder="- Vérifier l'équipement&#10;- Contacter le technicien&#10;- Rédiger le rapport"></textarea>
+                </div>
                 <div style="display:flex;gap:8px">
                     <button class="btn" type="submit">Ajouter</button>
                     <button type="button" class="btn secondary" onclick="resetHNOFormMain()">Réinitialiser</button>
@@ -84,7 +88,7 @@
         <div class="card" style="margin-top:16px">
             <h3>Liste des Tickets HNO</h3>
             <div style="overflow-x:auto">
-                <table id="hnoTableMain"><thead><tr><th>Désignation</th><th>Code Site</th><th>Date Limite</th><th>Description</th><th>Actions</th></tr></thead><tbody id="hnoTableBodyMain"><tr><td colspan="5" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr></tbody></table>
+                <table id="hnoTableMain"><thead><tr><th>Désignation</th><th>Code Site</th><th>Date Limite</th><th>Description</th><th>Todo</th><th>Actions</th></tr></thead><tbody id="hnoTableBodyMain"><tr><td colspan="6" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr></tbody></table>
             </div>
         </div>
     </div>
@@ -113,6 +117,10 @@
                     <label for="editHNODesc">Description de l'Intervention</label>
                     <textarea id="editHNODesc" rows="3"></textarea>
                 </div>
+                <div class="form-group">
+                    <label for="editHNOTodo">Todo Liste (une tâche par ligne)</label>
+                    <textarea id="editHNOTodo" rows="4" placeholder="- Vérifier l'équipement&#10;- Contacter le technicien"></textarea>
+                </div>
                 <button type="submit" class="btn" style="width:100%;margin-top:10px;">Enregistrer les Modifications</button>
             </form>
         </div>
@@ -135,15 +143,15 @@
         const HNO_KEY = 'suivi_hno_list_v1';
         function getList(){try{return JSON.parse(localStorage.getItem(HNO_KEY)||'[]')}catch(e){return[]}}
         function saveList(l){localStorage.setItem(HNO_KEY,JSON.stringify(l))}
-        function handleHNOFormMain(e){e.preventDefault();const designation=document.getElementById('hnoDesignationMain').value.trim();const site=document.getElementById('hnoSiteMain').value.trim();const dateLimite=document.getElementById('hnoDateLimiteMain').value;const desc=document.getElementById('hnoDescMain').value.trim();if(!designation||!site){alert('Désignation et Code Site requis');return}const item={id:Date.now(),designation,site,dateLimite:dateLimite||'',desc};const l=getList();l.unshift(item);saveList(l);render();resetHNOFormMain()}
-        function resetHNOFormMain(){document.getElementById('hnoFormMain').reset();document.getElementById('hnoDateLimiteMain').value='';document.getElementById('hnoDesignationMain').value='';document.getElementById('hnoSiteMain').value='';document.getElementById('hnoDescMain').value=''}
-        function render(){const b=document.getElementById('hnoTableBodyMain');const l=getList();b.innerHTML='';if(!l.length){b.innerHTML='<tr><td colspan="5" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr>';return}l.forEach(it=>{const tr=document.createElement('tr');const dlFormatted=it.dateLimite?new Date(it.dateLimite).toLocaleDateString('fr-FR'):'N/A';tr.innerHTML=`<td>${escapeHtml(it.designation||'')}</td><td>${escapeHtml(it.site)}</td><td>${dlFormatted}</td><td>${escapeHtml(it.desc)}</td><td class="actions"><button title="Supprimer" onclick="event.stopPropagation();deleteItem(${it.id})">🗑️</button></td>`;tr.onclick=()=>openEditModalHNO(it);b.appendChild(tr)})}
+        function handleHNOFormMain(e){e.preventDefault();const designation=document.getElementById('hnoDesignationMain').value.trim();const site=document.getElementById('hnoSiteMain').value.trim();const dateLimite=document.getElementById('hnoDateLimiteMain').value;const desc=document.getElementById('hnoDescMain').value.trim();const todo=document.getElementById('hnoTodoMain').value.trim();if(!designation||!site){alert('Désignation et Code Site requis');return}const item={id:Date.now(),designation,site,dateLimite:dateLimite||'',desc,todo:todo||''};const l=getList();l.unshift(item);saveList(l);render();resetHNOFormMain()}
+        function resetHNOFormMain(){document.getElementById('hnoFormMain').reset();document.getElementById('hnoDateLimiteMain').value='';document.getElementById('hnoDesignationMain').value='';document.getElementById('hnoSiteMain').value='';document.getElementById('hnoDescMain').value='';document.getElementById('hnoTodoMain').value=''}
+        function render(){const b=document.getElementById('hnoTableBodyMain');const l=getList();b.innerHTML='';if(!l.length){b.innerHTML='<tr><td colspan="6" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr>';return}l.forEach(it=>{const tr=document.createElement('tr');const dlFormatted=it.dateLimite?new Date(it.dateLimite).toLocaleDateString('fr-FR'):'N/A';const todoPreview=it.todo?(it.todo.split('\n')[0].substring(0,30)+(it.todo.length>30?'...':'')):'—';tr.innerHTML=`<td>${escapeHtml(it.designation||'')}</td><td>${escapeHtml(it.site)}</td><td>${dlFormatted}</td><td>${escapeHtml(it.desc)}</td><td style="font-style:italic;color:#666;">${escapeHtml(todoPreview)}</td><td class="actions"><button title="Supprimer" onclick="event.stopPropagation();deleteItem(${it.id})">🗑️</button></td>`;tr.onclick=()=>openEditModalHNO(it);b.appendChild(tr)})}
         function deleteItem(id){if(!confirm('Supprimer ?'))return;saveList(getList().filter(x=>x.id!==id));render()}
         function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[ch])}
-        function exportHNOCsvMain(){const l=getList();if(!l.length){alert('Aucun HNO à exporter');return}const headers=['Designation','Code_Site','Date_Limite','Description'];const rows=l.map(i=>[i.designation||'',i.site,i.dateLimite||'',i.desc||'']);const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""') }"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`hno_export_${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
-        function openEditModalHNO(item){document.getElementById('editHNOId').value=item.id;document.getElementById('editHNODesignation').value=item.designation||'';document.getElementById('editHNOSite').value=item.site||'';document.getElementById('editHNODateLimite').value=item.dateLimite||'';document.getElementById('editHNODesc').value=item.desc||'';document.getElementById('editModalHNO').style.display='block'}
+        function exportHNOCsvMain(){const l=getList();if(!l.length){alert('Aucun HNO à exporter');return}const headers=['Designation','Code_Site','Date_Limite','Description','Todo'];const rows=l.map(i=>[i.designation||'',i.site,i.dateLimite||'',i.desc||'',i.todo||'']);const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""') }"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`hno_export_${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+        function openEditModalHNO(item){document.getElementById('editHNOId').value=item.id;document.getElementById('editHNODesignation').value=item.designation||'';document.getElementById('editHNOSite').value=item.site||'';document.getElementById('editHNODateLimite').value=item.dateLimite||'';document.getElementById('editHNODesc').value=item.desc||'';document.getElementById('editHNOTodo').value=item.todo||'';document.getElementById('editModalHNO').style.display='block'}
         function closeEditModalHNO(){document.getElementById('editModalHNO').style.display='none'}
-        function handleEditSubmitHNO(e){e.preventDefault();const id=parseInt(document.getElementById('editHNOId').value);const designation=document.getElementById('editHNODesignation').value.trim();const site=document.getElementById('editHNOSite').value.trim();const dateLimite=document.getElementById('editHNODateLimite').value;const desc=document.getElementById('editHNODesc').value.trim();if(!designation||!site){alert('Désignation et Code Site requis');return}const l=getList();const index=l.findIndex(it=>it.id===id);if(index!==-1){l[index]={...l[index],designation,site,dateLimite:dateLimite||'',desc};saveList(l);render();closeEditModalHNO()}else{alert('Ticket introuvable')}}
+        function handleEditSubmitHNO(e){e.preventDefault();const id=parseInt(document.getElementById('editHNOId').value);const designation=document.getElementById('editHNODesignation').value.trim();const site=document.getElementById('editHNOSite').value.trim();const dateLimite=document.getElementById('editHNODateLimite').value;const desc=document.getElementById('editHNODesc').value.trim();const todo=document.getElementById('editHNOTodo').value.trim();if(!designation||!site){alert('Désignation et Code Site requis');return}const l=getList();const index=l.findIndex(it=>it.id===id);if(index!==-1){l[index]={...l[index],designation,site,dateLimite:dateLimite||'',desc,todo:todo||''};saveList(l);render();closeEditModalHNO()}else{alert('Ticket introuvable')}}
         window.onclick=function(event){const modal=document.getElementById('editModalHNO');if(event.target==modal){closeEditModalHNO()}}
         document.addEventListener('DOMContentLoaded',render);
     </script>
