@@ -489,19 +489,182 @@
         }
     </style>
 </head>
-<body onload="loadOTList()">
+<body onload="initApp()">
     <header>
         <div class="header-content">
             <div style="display: flex; align-items: center; gap: 20px;">
                 <div class="free-logo-small">free</div> 
                 <h1 style="font-size: 1.5em; font-weight: 900; margin: 0; padding-left: 20px; border-left: 1px solid rgba(255, 255, 255, 0.5);">Suivi des Ordres de Travaux</h1>
             </div>
+            <nav class="main-nav" aria-label="Main menu">
+                <ul class="nav-tabs">
+                    <li><button class="tab-btn active" data-target="tab-suivi" onclick="showTab('tab-suivi')">Suivi OT</button></li>
+                    <li><button class="tab-btn" data-target="tab-tools" onclick="showTab('tab-tools')">Outils</button></li>
+                    <li><button class="tab-btn" data-target="tab-settings" onclick="showTab('tab-settings')">Paramètres</button></li>
+                </ul>
+            </nav>
             <button onclick="openModal()" class="new-ticket-button">+ Créer un Nouveau Ticket</button>
         </div>
     </header>
 
     <div class="container">
-        <h2>Tableau de Bord</h2>
+        <div id="tab-suivi" class="tab-pane">
+            <h2>Tableau de Bord</h2>
+            <div class="section-separator"></div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <h3>Total OT Enregistrés</h3>
+                    <div class="kpi-value" id="kpiTotal">...</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>OT En Attente de Clôture</h3>
+                    <div class="kpi-value" id="kpiEnAttente">...</div>
+                </div>
+                <div class="kpi-card alert">
+                    <h3>OT En Retard</h3>
+                    <div class="kpi-value" id="kpiEnRetard">...</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>OT Résolus ce Mois</h3>
+                    <div class="kpi-value" id="kpiResolus">...</div>
+                </div>
+            </div>
+
+            <div class="filter-container" style="margin: 0 20px 20px 20px; display: flex; gap: 20px; align-items: center;">
+                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Rechercher par ID, Désignation ou Site..." style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; font-size: 1em;">
+                
+                <label for="filterStatus" style="font-weight: 500; color: var(--free-dark);">Filtre Statut</label>
+                <select id="filterStatus" onchange="filterTable()" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; width: 250px;">
+                    <option value="">Tous les Statuts</option>
+                    <option value="À prendre en charge">À prendre en charge</option>
+                    <option value="Planifié">Planifié</option>
+                    <option value="Stagnant">Stagnant</option>
+                    <option value="Résolu">Résolu</option>
+                    <option value="Annulé">Annulé</option>
+                </select>
+            </div>
+            
+            <div style="margin: 0 20px 10px 20px; display: flex; justify-content: flex-end; align-items: center; font-size: 0.9em;">
+                <label for="itemsPerPage">Afficher :</label>
+                <select id="itemsPerPage" onchange="filterTable()" style="padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; margin-left: 10px;">
+                    <option value="10">10 éléments</option>
+                    <option value="20">20 éléments</option>
+                    <option value="50">50 éléments</option>
+                    <option value="100">100 éléments</option>
+                    <option value="9999">Tout</option>
+                </select>
+                <span id="paginationInfo" style="margin-left: 20px; font-weight: 500;"></span>
+            </div>
+            
+            <h2>Liste Détaillée des Ordres de Travaux</h2>
+            <div class="section-separator"></div>
+
+
+            <div class="ot-table-wrapper">
+                <div id="filterDropdown" style="display:none;"></div> 
+                
+                <table class="ot-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Désignation</th>
+                            <th data-column-key="codeSite">Code Site <button class="filter-btn" onclick="event.stopPropagation(); toggleColumnFilter('codeSite', event)"><i class="fas fa-filter"></i></button></th>
+                            <th data-column-key="priorite">Priorité <button class="filter-btn" onclick="event.stopPropagation(); toggleColumnFilter('priorite', event)"><i class="fas fa-filter"></i></button></th>
+                            <th data-column-key="majeur">Majeur <button class="filter-btn" onclick="event.stopPropagation(); toggleColumnFilter('majeur', event)"><i class="fas fa-filter"></i></button></th>
+                            <th data-column-key="Statut">Statut <button class="filter-btn" onclick="event.stopPropagation(); toggleColumnFilter('Statut', event)"><i class="fas fa-filter"></i></button></th>
+                            <th>Date Prévue</th> 
+                            <th data-column-key="dateLimite">Date Limite <button class="filter-btn" onclick="event.stopPropagation(); sortTable('dateLimite')"><i class="fas fa-sort"></i></button></th>
+                            <th data-column-key="Exec. Sal.">Assigné à <button class="filter-btn" onclick="event.stopPropagation(); toggleColumnFilter('Exec. Sal.', event)"><i class="fas fa-filter"></i></button></th>
+                            <th>Actions</th> 
+                        </tr>
+                    </thead>
+                    <tbody id="otTableBody">
+                        <tr><td colspan="10" style="text-align:center;">Chargement des données...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="paginationControls" style="margin: 20px; display: flex; justify-content: center; gap: 10px;">
+                </div>
+        </div>
+
+        <div id="tab-tools" class="tab-pane" style="display:none;">
+            <h2>Outils</h2>
+            <div class="section-separator"></div>
+
+            <!-- HNO Tracker -->
+            <div style="margin: 20px 0;">
+                <h3>Suivi des HNO</h3>
+                <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
+                    <form id="hnoForm" style="flex:1 1 420px; background: #fff; padding: 16px; border-radius:6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);" onsubmit="handleHNOForm(event)">
+                        <div class="form-group">
+                            <label for="hnoDate">Date</label>
+                            <input type="date" id="hnoDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="hnoSite">Code Site</label>
+                            <input type="text" id="hnoSite" placeholder="Ex: S1-IDF" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="hnoDesc">Description</label>
+                            <textarea id="hnoDesc" placeholder="Courte description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="hnoDuration">Durée (h)</label>
+                            <input type="number" id="hnoDuration" min="0" step="0.25">
+                        </div>
+                        <div class="form-group">
+                            <label for="hnoStatus">Statut</label>
+                            <select id="hnoStatus">
+                                <option value="En cours">En cours</option>
+                                <option value="Terminé">Terminé</option>
+                                <option value="Annulé">Annulé</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button type="submit" class="form-submit-button" style="flex:1">Ajouter HNO</button>
+                            <button type="button" class="clear-btn" onclick="resetHNOForm()" style="flex:0">Réinitialiser</button>
+                        </div>
+                    </form>
+
+                    <div style="flex:2 1 560px; background:#fff; padding:16px; border-radius:6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <strong>Liste HNO</strong>
+                            <div>
+                                <button class="new-ticket-button" onclick="exportHNOCsv()">Exporter CSV</button>
+                            </div>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table id="hnoTable" style="width:100%; border-collapse:collapse;">
+                                <thead>
+                                    <tr style="background:var(--free-primary); color:#fff;">
+                                        <th style="padding:8px;">Date</th>
+                                        <th style="padding:8px;">Site</th>
+                                        <th style="padding:8px;">Description</th>
+                                        <th style="padding:8px;">Durée (h)</th>
+                                        <th style="padding:8px;">Statut</th>
+                                        <th style="padding:8px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hnoTableBody">
+                                    <tr><td colspan="6" style="text-align:center; padding:12px; font-style:italic; color:#666;">Aucun HNO enregistré.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="tab-settings" class="tab-pane" style="display:none;">
+            <h2>Paramètres</h2>
+            <div class="section-separator"></div>
+            <div style="margin: 20px; background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+                <p>Configuration de l'application (liens, endpoints, préférences utilisateur).</p>
+            </div>
+        </div>
         <div class="section-separator"></div>
 
         <div class="kpi-grid">
@@ -722,6 +885,146 @@
     </div>
 
     <script>
+        // Simple tab navigation for multiple tools
+        function initApp() {
+            // Show default tab
+            showTab('tab-suivi');
+            // Load OT list for the default tab
+            try { loadOTList(); } catch (e) { console.warn('loadOTList not available yet', e); }
+        }
+
+        function showTab(tabId) {
+            // Hide all panes
+            document.querySelectorAll('.tab-pane').forEach(p => {
+                p.style.display = 'none';
+            });
+            // Remove active from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            // Show requested pane
+            const pane = document.getElementById(tabId);
+            if (pane) pane.style.display = '';
+
+            // Mark the corresponding button active
+            const btn = document.querySelector(`.tab-btn[data-target="${tabId}"]`);
+            if (btn) btn.classList.add('active');
+
+            // If the user navigates to the Suivi tab, refresh the list
+            if (tabId === 'tab-suivi') {
+                try { filterTable(true); } catch (e) { console.warn('filterTable not available', e); }
+            }
+        }
+
+        // -----------------------
+        // HNO Tracker (localStorage)
+        // -----------------------
+        const HNO_STORAGE_KEY = 'suivi_hno_list_v1';
+
+        function getHNOList() {
+            try {
+                const raw = localStorage.getItem(HNO_STORAGE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                console.error('Erreur lecture HNO localStorage', e);
+                return [];
+            }
+        }
+
+        function saveHNOList(list) {
+            localStorage.setItem(HNO_STORAGE_KEY, JSON.stringify(list));
+        }
+
+        function handleHNOForm(event) {
+            event.preventDefault();
+            const date = document.getElementById('hnoDate').value;
+            const site = document.getElementById('hnoSite').value.trim();
+            const desc = document.getElementById('hnoDesc').value.trim();
+            const duration = document.getElementById('hnoDuration').value;
+            const status = document.getElementById('hnoStatus').value;
+
+            if (!date || !site) {
+                alert('Date et Code Site requis.');
+                return;
+            }
+
+            const list = getHNOList();
+            const newItem = {
+                id: Date.now(),
+                date, site, desc, duration: duration || '', status
+            };
+            list.unshift(newItem);
+            saveHNOList(list);
+            renderHNOTable();
+            resetHNOForm();
+        }
+
+        function resetHNOForm() {
+            document.getElementById('hnoForm').reset();
+            document.getElementById('hnoDate').value = '';
+        }
+
+        function renderHNOTable() {
+            const tbody = document.getElementById('hnoTableBody');
+            const list = getHNOList();
+            tbody.innerHTML = '';
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:12px; font-style:italic; color:#666;">Aucun HNO enregistré.</td></tr>`;
+                return;
+            }
+
+            list.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding:8px;">${item.date}</td>
+                    <td style="padding:8px;">${escapeHtml(item.site)}</td>
+                    <td style="padding:8px;">${escapeHtml(item.desc)}</td>
+                    <td style="padding:8px;">${item.duration || ''}</td>
+                    <td style="padding:8px;">${item.status}</td>
+                    <td style="padding:8px; text-align:center;">
+                        <button class="delete-button" title="Supprimer" onclick="deleteHNO(${item.id})"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteHNO(id) {
+            if (!confirm('Supprimer cet enregistrement HNO ?')) return;
+            const list = getHNOList().filter(x => x.id !== id);
+            saveHNOList(list);
+            renderHNOTable();
+        }
+
+        function exportHNOCsv() {
+            const list = getHNOList();
+            if (!list || list.length === 0) { alert('Aucun HNO à exporter.'); return; }
+
+            const headers = ['Date','Site','Description','Duree_h','Statut'];
+            const rows = list.map(i => [i.date, i.site, i.desc, i.duration || '', i.status]);
+            const csv = [headers, ...rows].map(r => r.map(cell => '"' + String(cell || '').replace(/"/g, '""') + '"').join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hno_export_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>"]+/g, function(match) {
+                return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'} )[match];
+            });
+        }
+
+        // Render HNO table on load of tools tab
+        document.addEventListener('DOMContentLoaded', function() {
+            try { renderHNOTable(); } catch(e){}
+        });
         // ************************************************************************************
         // CONFIGURATION
         // URL DE VOTRE DÉPLOIEMENT APPS SCRIPT
