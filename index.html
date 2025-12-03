@@ -539,12 +539,12 @@
 <body onload="initApp()">
     <header>
         <div class="header-content">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <div class="free-logo-small">free</div> 
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="nav-toggle" aria-label="Afficher le menu" aria-expanded="false" onclick="toggleNav()" style="margin-right:8px;"><i class="fas fa-bars" aria-hidden="true"></i></button>
+                <div class="free-logo-small">free</div>
                 <h1 style="font-size: 1.5em; font-weight: 900; margin: 0; padding-left: 20px; border-left: 1px solid rgba(255, 255, 255, 0.5);">Suivi des Ordres de Travaux</h1>
             </div>
             <nav class="main-nav" aria-label="Main menu">
-                <button class="nav-toggle" aria-label="Afficher le menu" aria-expanded="false" onclick="toggleNav()"><i class="fas fa-bars" aria-hidden="true"></i></button>
                 <ul class="nav-tabs">
                     <li><button class="tab-btn active" data-target="tab-suivi" onclick="showTab('tab-suivi')">Suivi OT</button></li>
                     <li><button class="tab-btn" data-target="tab-tools" onclick="showTab('tab-tools')">Outils</button></li>
