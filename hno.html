@@ -106,6 +106,12 @@
             <table id="hnoTableMain"><thead><tr><th>Désignation</th><th>Code Site</th><th>Date Limite</th><th>Statut</th><th>Description</th><th>Todo</th><th>Actions</th></tr></thead><tbody id="hnoTableBodyMain"><tr><td colspan="7" style="text-align:center;color:#666;padding:12px">Aucun enregistrement.</td></tr></tbody></table>
         </div>
     </div>
+
+    <div id="createModalHNO" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeCreateModalHNO()">&times;</span>
+            <h2 style="text-align:center;border-bottom:2px solid var(--free-primary);padding-bottom:15px;font-weight:700;margin-top:10px;">Créer un Nouveau Ticket HNO</h2>
+            <form id="hnoFormMain" onsubmit="handleHNOFormMain(event)">
                 <div class="form-group">
                     <label for="hnoDesignationMain">Désignation de la Tâche <span style="color:var(--free-primary);">*</span></label>
                     <input id="hnoDesignationMain" type="text" placeholder="Ex: Maintenance antenne" required>
