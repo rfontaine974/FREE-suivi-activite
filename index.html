@@ -96,8 +96,9 @@
             margin: 30px auto;
             padding: 25px 0;
         }
-        /* Navigation tabs styles */
-        .nav-tabs { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; align-items: center; }
+        /* Navigation tabs styles - hidden by default and shown when menu toggled */
+        .nav-tabs { list-style: none; margin: 0; padding: 0; display: none; gap: 8px; align-items: center; }
+        .nav-tabs.show { display: flex; }
         .nav-tabs li { margin: 0; }
         .tab-btn {
             background: transparent;
