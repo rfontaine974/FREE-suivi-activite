@@ -65,12 +65,9 @@
         }
 
         .free-logo-small {
-            font-family: 'Merriweather', serif;
-            font-style: italic;
-            font-weight: 700;
-            font-size: 1.5em;
-            color: white;
-            line-height: 1;
+            height: 24px; /* Correspond à 1.5em pour une police de 16px */
+            filter: grayscale(1) brightness(100); /* Astuce pour rendre un logo monochrome blanc */
+            vertical-align: middle;
         }
 
         .new-ticket-button {
@@ -542,7 +539,7 @@
         <div class="header-content">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <button class="nav-toggle" aria-label="Afficher le menu" aria-expanded="false" onclick="toggleNav()" style="margin-right:8px;"><i class="fas fa-bars" aria-hidden="true"></i></button>
-                <div class="free-logo-small">free</div>
+                <img class="free-logo-small" src="https://raw.githubusercontent.com/rfontaine974/FREE-suivi-activite/main/Free_logo.svg.png" alt="Logo Free">
                 <h1 style="font-size: 1.5em; font-weight: 900; margin: 0; padding-left: 20px; border-left: 1px solid rgba(255, 255, 255, 0.5);">Suivi des Ordres de Travaux</h1>
             </div>
             <nav class="main-nav" aria-label="Main menu">
