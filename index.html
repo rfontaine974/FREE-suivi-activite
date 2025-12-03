@@ -548,8 +548,7 @@
             <nav class="main-nav" aria-label="Main menu">
                 <ul class="nav-tabs">
                     <li><button class="tab-btn active" data-target="tab-suivi" onclick="showTab('tab-suivi')">Suivi OT</button></li>
-                    <li><button class="tab-btn" data-target="tab-tools" onclick="showTab('tab-tools')">Outils</button></li>
-                    <li><button class="tab-btn" data-target="tab-settings" onclick="showTab('tab-settings')">Paramètres</button></li>
+                    <li><button class="tab-btn" onclick="window.location.href='hno.html'">Suivi HNO</button></li>
                 </ul>
             </nav>
             <button onclick="openModal()" class="new-ticket-button">+ Créer un Nouveau Ticket</button>
@@ -638,31 +637,7 @@
                 </div>
         </div>
 
-        <div id="tab-tools" class="tab-pane" style="display:none;">
-            <h2>Outils</h2>
-            <div class="section-separator"></div>
 
-            <!-- HNO Tracker -->
-            <div style="margin: 20px 0;">
-                <h3>Suivi des HNO</h3>
-                <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
-                    <div style="flex:1 1 420px; background: #fff; padding: 16px; border-radius:6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-                        <p>Le suivi des HNO a été déplacé vers une page dédiée.</p>
-                        <p><a class="new-ticket-button" href="/hno.html">Ouvrir le Suivi HNO</a></p>
-                        <p style="margin-top:10px; color:#666;">La page HNO permet d'ajouter, éditer, supprimer et exporter les enregistrements.</p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div id="tab-settings" class="tab-pane" style="display:none;">
-            <h2>Paramètres</h2>
-            <div class="section-separator"></div>
-            <div style="margin: 20px; background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-                <p>Configuration de l'application (liens, endpoints, préférences utilisateur).</p>
-            </div>
-        </div>
         <div class="section-separator"></div>
 
         <div class="kpi-grid">
@@ -919,6 +894,17 @@
             const toggle = document.querySelector('.nav-toggle');
             if (!tabs || !toggle) return;
             const isShown = tabs.classList.toggle('show');
+
+            const suiviOtButton = document.querySelector('.tab-btn[data-target="tab-suivi"]');
+            if (suiviOtButton) {
+                const li = suiviOtButton.parentElement;
+                if (isShown && suiviOtButton.classList.contains('active')) {
+                    li.style.display = 'none';
+                } else {
+                    li.style.display = '';
+                }
+            }
+            
             // Toggle icon between bars and times
             const icon = toggle.querySelector('i');
             if (icon) {
@@ -944,6 +930,10 @@
             if (tabs.classList.contains('show')) {
                 if (!tabs.contains(e.target) && !toggle.contains(e.target)) {
                     tabs.classList.remove('show');
+                    const suiviOtButton = document.querySelector('.tab-btn[data-target="tab-suivi"]');
+                    if (suiviOtButton) {
+                        suiviOtButton.parentElement.style.display = '';
+                    }
                 }
             }
         });

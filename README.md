@@ -40,6 +40,17 @@ Remplacez `<votre-username>` par votre nom d'utilisateur GitHub.
 - Sélectionnez le repo `Suivi-d-intervention` et importez.
 - Vercel détectera une application statique; gardez les valeurs par défaut.
 
+Automatisation via GitHub Actions (optionnel)
+
+Vous pouvez automatiser le déploiement via GitHub Actions. J'ai ajouté un workflow (`.github/workflows/deploy-vercel.yml`) qui se déclenche à chaque push sur `main` et déploie vers Vercel.
+
+Secrets requis dans le dépôt GitHub (Repository > Settings > Secrets & variables > Actions):
+- `VERCEL_TOKEN` : générez un token dans votre compte Vercel (Settings > Tokens).
+- `VERCEL_ORG_ID` et `VERCEL_PROJECT_ID` : obtenez-les depuis les paramètres de votre projet Vercel.
+- `WEB_APP_URL` (optionnel) : si vous fournissez ce secret, le workflow écrira automatiquement un `config.js` contenant `window.__CONFIG__ = { WEB_APP_URL: '...' }` avant le déploiement.
+
+Après avoir ajouté les secrets, chaque push sur `main` déclenchera un déploiement automatique.
+
 4) Variables d'environnement et `config.js`
 
 - Pour que le front appelle votre Apps Script, vous pouvez soit :
