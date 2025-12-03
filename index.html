@@ -125,6 +125,16 @@
             cursor: pointer;
             font-size: 18px;
         }
+        .nav-toggle i {
+            transition: transform 220ms ease, color 220ms ease;
+            font-size: 18px;
+            display: inline-block;
+            line-height: 1;
+        }
+        .nav-toggle.open i {
+            transform: rotate(90deg) scale(1.05);
+            color: #fff;
+        }
 
         @media (max-width: 900px) {
             .nav-tabs { display: none; position: absolute; right: 20px; top: 60px; flex-direction: column; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
@@ -534,7 +544,7 @@
                 <h1 style="font-size: 1.5em; font-weight: 900; margin: 0; padding-left: 20px; border-left: 1px solid rgba(255, 255, 255, 0.5);">Suivi des Ordres de Travaux</h1>
             </div>
             <nav class="main-nav" aria-label="Main menu">
-                <button class="nav-toggle" aria-label="Afficher le menu" onclick="toggleNav()">☰</button>
+                <button class="nav-toggle" aria-label="Afficher le menu" aria-expanded="false" onclick="toggleNav()"><i class="fas fa-bars" aria-hidden="true"></i></button>
                 <ul class="nav-tabs">
                     <li><button class="tab-btn active" data-target="tab-suivi" onclick="showTab('tab-suivi')">Suivi OT</button></li>
                     <li><button class="tab-btn" data-target="tab-tools" onclick="showTab('tab-tools')">Outils</button></li>
@@ -905,8 +915,24 @@
         // Toggle responsive nav (hamburger) on small screens
         function toggleNav() {
             const tabs = document.querySelector('.nav-tabs');
-            if (!tabs) return;
-            tabs.classList.toggle('show');
+            const toggle = document.querySelector('.nav-toggle');
+            if (!tabs || !toggle) return;
+            const isShown = tabs.classList.toggle('show');
+            // Toggle icon between bars and times
+            const icon = toggle.querySelector('i');
+            if (icon) {
+                if (isShown) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                    toggle.classList.add('open');
+                    toggle.setAttribute('aria-expanded', 'true');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                    toggle.classList.remove('open');
+                    toggle.setAttribute('aria-expanded', 'false');
+                }
+            }
         }
 
         // Close responsive nav when clicking outside
