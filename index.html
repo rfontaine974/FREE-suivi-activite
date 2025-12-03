@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi des Ordres de Travaux - FREE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+    
+    <style>
+        /* Variables de Couleurs FREE */
+        :root {
+            --free-primary: #E80029; /* Rouge vif pour l'accentuation et l'alerte */
+            --free-dark: #333333;
+            --free-light-bg: #F5F5F5; /* Fond principal */
+            --free-text-light: #666;
+            --button-bg-light: #FFECEF; /* Fond clair pour le bouton */
+
+            /* Couleurs fonctionnelles (Priorités) */
+            --p1-color: var(--free-primary);
+            --p2-color: #ffa500;
+            --p3-color: #008000;
+            --p4-color: #808080;
+            --proj-spec-color: var(--free-primary); /* PROJET = ROUGE PRINCIPAL */
+
+            /* Couleurs statuts */
+            --status-pending: #ffc107;
+            --status-planned: #17a2b8;
+            --status-stagnant: var(--p1-color);
+            --status-resolved: #28a745;
+
+            /* Couleurs Majeurs */
+            --majeur-reseau: #007bff;
+            --majeur-radio: #28a745;
+            --majeur-fibre: #6c757d;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--free-light-bg);
+            color: var(--free-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--free-primary);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .free-logo-small {
+            font-family: 'Merriweather', serif;
+            font-style: italic;
+            font-weight: 700;
+            font-size: 1.5em;
+            color: white;
+            line-height: 1;
+        }
+
+        .new-ticket-button {
+            background-color: var(--button-bg-light);
+            color: var(--free-primary);
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1em;
+            transition: opacity 0.3s;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+        .new-ticket-button:hover {
+            opacity: 0.9;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 25px 0;
+        }
+
+        h2 {
+            color: var(--free-dark);
+            font-size: 2em;
+            font-weight: 900;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            text-align: left;
+            padding-left: 20px;
+        }
+        .section-separator {
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 30px;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin: 0 20px 40px 20px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-left: 5px solid var(--free-primary);
+            border-radius: 4px;
+            padding: 20px;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .kpi-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 0.9em;
+            color: var(--free-text-light);
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            font-size: 2.8em;
+            font-weight: 900;
+            color: var(--free-dark);
+        }
+
+        .kpi-card.alert {
+            border-left: 5px solid var(--p1-color);
+        }
+        .kpi-card.alert .kpi-value {
+            color: var(--p1-color);
+        }
+
+        .ot-table-wrapper { margin: 0 20px; overflow-x: auto; position: relative; }
+        .ot-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 25px; 
+            border: 1px solid #eee; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+        .ot-table th { 
+            background-color: var(--free-primary); 
+            color: white; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            font-size: 0.8em; 
+            position: relative; 
+        }
+        .ot-table tbody tr:nth-child(even) { background-color: white; }
+        .ot-table tbody tr:nth-child(odd) { background-color: var(--free-light-bg); }
+        .ot-table th, .ot-table td { padding: 12px 18px; text-align: left; border-bottom: 1px solid #eee; }
+        
+        .ot-table tbody tr {
+            transition: background-color 0.15s ease-in-out;
+        }
+        .ot-table tbody tr:hover {
+            background-color: #e9e9e9 !important; 
+        }
+        
+        /* Bouton de filtre dans l'en-tête */
+        .filter-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            margin-left: 5px;
+            padding: 0;
+            font-size: 0.9em;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .filter-btn:hover {
+            opacity: 1;
+        }
+        
+        /* Conteneur de Filtre Excel-like */
+        #filterDropdown {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 200;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            min-width: 150px;
+        }
+        #filterDropdown .filter-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        #filterDropdown .filter-item:hover {
+            background-color: #f0f0f0;
+        }
+        #filterDropdown label {
+            margin-left: 8px;
+            cursor: pointer;
+        }
+        #filterDropdown .filter-header {
+            font-weight: 700;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 8px;
+            font-size: 1em;
+            color: var(--free-dark);
+        }
+        .filter-actions {
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        .filter-actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        .apply-btn { background-color: var(--free-primary); color: white; }
+        .clear-btn { background-color: #eee; color: var(--free-dark); }
+
+
+        /* Styles fonctionnels (priorité/statut) */
+        [class*="priority-"], [class*="status-"] {
+            border-radius: 3px; padding: 3px 6px; display: inline-block; font-size: 0.9em; font-weight: 500; color: white; text-align: center;
+        }
+        .priority-P1 { background-color: var(--p1-color); }
+        .priority-P2 { background-color: var(--p2-color); }
+        .priority-P3 { background-color: var(--p3-color); }
+        .priority-P4 { background-color: var(--p4-color); }
+        .priority-Projet { background-color: var(--proj-spec-color); }
+
+        /* Correction des statuts : Forcer le texte noir sur les fonds clairs */
+        .status-A_prendre_en_charge { 
+            background-color: var(--status-pending); /* Jaune/Orange clair */
+            color: black !important; /* Texte NOIR forcé pour la lisibilité maximale */
+        }
+        .status-Planifie { 
+            background-color: var(--status-planned); 
+            color: white !important; 
+        }
+        .status-Stagnant { background-color: var(--status-stagnant); } 
+        .status-Resolu { background-color: var(--status-resolved); } 
+        .status-Résolu { background-color: var(--status-resolved); } 
+        .status-Annulé { background-color: #777; } 
+        .status-A_définir { 
+            background-color: #ccc; /* Gris très clair pour 'À définir' */
+            color: black !important; /* Texte NOIR forcé */
+        }
+        
+        .majeur-RESEAU { color: var(--majeur-reseau); font-weight: 500; }
+        .majeur-RADIO { color: var(--majeur-radio); font-weight: 500; }
+        .majeur-FIBRE { color: var(--majeur-fibre); font-weight: 500; }
+
+        .chart-placeholder {
+            background-color: #f0f0f0;
+            border: 1px dashed #ccc;
+            padding: 50px;
+            text-align: center;
+            font-style: italic;
+            color: #888;
+            margin: 20px 20px 40px 20px;
+            border-radius: 8px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Styles de la MODALE */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border: none;
+            width: 90%; 
+            max-width: 800px; 
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation-name: animatetop;
+            animation-duration: 0.4s;
+        }
+
+        @keyframes animatetop {
+            from {top: -300px; opacity: 0}
+            to {top: 5%; opacity: 1}
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: -10px;
+            margin-right: -10px;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: var(--free-primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Formulaire */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--free-dark);
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-submit-button {
+            background-color: var(--free-primary);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 700;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        .form-submit-button:hover {
+            background-color: #c70020;
+        }
+        
+        /* Bouton de Suppression */
+        .delete-button {
+            background: none;
+            border: none;
+            color: #dc3545; 
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: color 0.2s;
+        }
+        .delete-button:hover {
+            color: #c82333;
+        }
+        
+        /* Style pour l'affichage du Retard J+X */
+        .retard {
+            color: white; 
+            background-color: var(--free-primary); 
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        /* NOUVEAUX STYLES POUR LA CHRONOLOGIE D'HISTORIQUE */
+
+        .history-container {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 2px dashed #ccc;
+            position: relative; /* Conteneur de la chronologie */
+        }
+
+        /* Ligne verticale de la chronologie */
+        .history-timeline {
+            border-left: 2px solid #ddd;
+            margin-left: 25px; /* Décalage pour aligner la ligne */
+            padding-left: 15px;
+            padding-bottom: 5px;
+        }
+
+        .history-entry {
+            position: relative;
+            padding: 0 0 20px 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Cercle de l'événement sur la ligne du temps */
+        .history-entry:before {
+            content: '';
+            position: absolute;
+            left: -13px; /* Aligné sur la ligne verticale */
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--free-primary); /* Point rouge Free */
+            border: 3px solid #fff; /* Effet 3D sur fond blanc */
+            box-shadow: 0 0 0 1px var(--free-primary);
+        }
+
+        .history-meta {
+            font-size: 0.85em;
+            color: var(--free-text-light);
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-style: italic;
+        }
+
+        .history-change {
+            font-size: 0.95em;
+            font-weight: 500;
+            color: var(--free-dark);
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        /* Mise en évidence des mots clés */
+        .history-change strong {
+            color: var(--free-primary);
+        }
+        
+        /* Style pour la pagination */
+        #paginationControls button {
+            background-color: #fff;
+            color: var(--free-primary);
+            border: 1px solid var(--free-primary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        #paginationControls button:hover {
+            background-color: var(--free-primary);
+            color: white;
+        }
+
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--free-text-light);
+            font-size: 0.9em;
+            margin-top: 50px;
+            border-top: 1px solid #eee;
+            background-color: white;
+        }
+    </style>
+</head>
+<body onload="loadOTList()">
+    <header>
+        <div class="header-content">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="free-logo-small">free</div> 
+                <h1 style="font-size: 1.5em; font-weight: 900; margin: 0; padding-left: 20px; border-left: 1px solid rgba(255, 255, 255, 0.5);">Suivi des Ordres de Travaux</h1>
+            </div>
+            <button onclick="openModal()" class="new-ticket-button">+ Créer un Nouveau Ticket</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Tableau de Bord</h2>
+        <div class="section-separator"></div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <h3>Total OT Enregistrés</h3>
+                <div class="kpi-value" id="kpiTotal">...</div>
+            </div>
+            <div class="kpi-card">
+                <h3>OT En Attente de Clôture</h3>
+                <div class="kpi-value" id="kpiEnAttente">...</div>
+            </div>
+            <div class="kpi-card alert">
+                <h3>OT En Retard</h3>
+                <div class="kpi-value" id="kpiEnRetard">...</div>
+            </div>
+            <div class="kpi-card">
+                <h3>OT Résolus ce Mois</h3>
+                <div class="kpi-value" id="kpiResolus">...</div>
+            </div>
+        </div>
+
+        <div class="filter-container" style="margin: 0 20px 20px 20px; display: flex; gap: 20px; align-items: center;">
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Rechercher par ID, Désignation ou Site..." style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; font-size: 1em;">
+            
+            <label for="filterStatus" style="font-weight: 500; color: var(--free-dark);">Filtre Statut</label>
+            <select id="filterStatus" onchange="filterTable()" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; width: 250px;">
+                <option value="">Tous les Statuts</option>
+                <option value="À prendre en charge">À prendre en charge</option>
+                <option value="Planifié">Planifié</option>
+                <option value="Stagnant">Stagnant</option>
+                <option value="Résolu">Résolu</option>
+                <option value="Annulé">Annulé</option>
+            </select>
+        </div>
+        
+        
+        <div style="margin: 0 20px 10px 20px; display: flex; justify-content: flex-end; align-items: center; font-size: 0.9em;">
+            <label for="itemsPerPage">Afficher :</label>
+            <select id="itemsPerPage" onchange="filterTable()" style="padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; margin-left: 10px;">
+                <option value="10">10 éléments</option>
+                <option value="20">20 éléments</option>
+                <option value="50">50 éléments</option>
+                <option value="100">100 éléments</option>
+                <option value="9999">Tout</option>
+            </select>
+            <span id="paginationInfo" style="margin-left: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <h2>Liste Détaillée des Ordres de Travaux</h2>
+        <div class="section-separator"></div>
+
+
+        <div class="ot-table-wrapper">
+            <div id="filterDropdown" style="display:none;"></div> 
+            
+            <table class="ot-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Désignation</th>
+                        <th data-column-key="codeSite">Code Site <button class="filter-btn" onclick="event.stopPropagation(); toggleColumnFilter('codeSite', event)"><i class="fas fa-filter"></i></button></th>
+                        <th data-column-key="priorite">Priorité <button class="filter-btn" onclick="event.stopPropagation(); toggleColumnFilter('priorite', event)"><i class="fas fa-filter"></i></button></th>
+                        <th data-column-key="majeur">Majeur <button class="filter-btn" onclick="event.stopPropagation(); toggleColumnFilter('majeur', event)"><i class="fas fa-filter"></i></button></th>
+                        <th data-column-key="Statut">Statut <button class="filter-btn" onclick="event.stopPropagation(); toggleColumnFilter('Statut', event)"><i class="fas fa-filter"></i></button></th>
+                        <th>Date Prévue</th> 
+                        <th data-column-key="dateLimite">Date Limite <button class="filter-btn" onclick="event.stopPropagation(); sortTable('dateLimite')"><i class="fas fa-sort"></i></button></th>
+                        <th data-column-key="Exec. Sal.">Assigné à <button class="filter-btn" onclick="event.stopPropagation(); toggleColumnFilter('Exec. Sal.', event)"><i class="fas fa-filter"></i></button></th>
+                        <th>Actions</th> 
+                    </tr>
+                </thead>
+                <tbody id="otTableBody">
+                    <tr><td colspan="10" style="text-align:center;">Chargement des données...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="paginationControls" style="margin: 20px; display: flex; justify-content: center; gap: 10px;">
+            </div>
+    </div> 
+    <footer>
+        Outil de Suivi des Ordres de Travaux | Développement interne | Free © 2025
+    </footer>
+    
+    <div id="otModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h2 style="text-align: center; border-bottom: 2px solid var(--free-primary); padding-bottom: 15px; font-weight: 700; margin-top: 10px;">Créer un Nouveau Ticket OT</h2>
+            
+            <form id="ticketForm" onsubmit="handleFormSubmit(event)">
+                <div class="form-group">
+                    <label for="id">ID du Ticket (Ex: OT-007) <span style="color:red;">*</span></label>
+                    <input type="text" id="id" name="ID" placeholder="Ex: OT-007" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="designation">Désignation de la Tâche <span style="color:red;">*</span></label>
+                    <input type="text" id="designation" name="designation" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description Détaillée du Problème</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="siteCode">Code Site (Localisation) <span style="color:red;">*</span></label>
+                    <input type="text" id="siteCode" name="codeSite" placeholder="Ex: S1-IDF, B3-Lyon" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="majeur">Majeur (Service concerné) <span style="color:red;">*</span></label>
+                    <select id="majeur" name="majeur" required>
+                        <option value="">-- Choisir --</option>
+                        <option value="RESEAU">Réseau</option>
+                        <option value="RADIO">Radio</option>
+                        <option value="FIBRE">Fibre</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="priorite">Priorité demandée <span style="color:red;">*</span></label>
+                    <select id="priorite" name="priorite" required>
+                        <option value="">-- Choisir --</option>
+                        <option value="P1">P1 (Urgent)</option>
+                        <option value="P2">P2 (Élevée)</option>
+                        <option value="P3">P3 (Normale)</option>
+                        <option value="P4">P4 (Basse)</option>
+                        <option value="Projet">Projet spéciaux</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateLimite">Date Limite souhaitée</label>
+                    <input type="date" id="dateLimite" name="dateLimite">
+                </div>
+
+                <button type="submit" class="form-submit-button">Soumettre le Ticket</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeEditModal()">&times;</span>
+            <h2 style="text-align: center; border-bottom: 2px solid var(--free-primary); padding-bottom: 15px; font-weight: 700; margin-top: 10px;">Éditer le Ticket <span id="editTicketID" style="color:var(--free-primary);"></span></h2>
+            
+            <form id="editForm" onsubmit="handleEditSubmit(event)">
+                <input type="hidden" id="editRowIndex" name="rowIndex">
+
+                <div class="form-group">
+                    <label for="editDescription">Description Détaillée du Problème</label>
+                    <textarea id="editDescription" readonly style="background-color: #eee; font-style: italic;"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editMajeur">Majeur (Service concerné) <span style="color:red;">*</span></label>
+                    <select id="editMajeur" name="majeur" required>
+                        <option value="">-- Choisir --</option>
+                        <option value="RESEAU">Réseau</option>
+                        <option value="RADIO">Radio</option>
+                        <option value="FIBRE">Fibre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editStatut">Statut Actuel <span style="color:red;">*</span></label>
+                    <select id="editStatut" name="Statut" required>
+                        <option value="À prendre en charge">À prendre en charge</option>
+                        <option value="Planifié">Planifié</option>
+                        <option value="Stagnant">Stagnant</option>
+                        <option value="Résolu">Résolu</option>
+                        <option value="Annulé">Annulé</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAssignee">Assigné à :</label>
+                    <select id="editAssignee" name="Exec. Sal.">
+                        <option value="">(À assigner)</option>
+                        <option value="DEVLIN Christophe">DEVLIN Christophe</option>
+                        <option value="KHERBOUCHE Zoubir">KHERBOUCHE Zoubir</option>
+                        <option value="PEREIRA David">PEREIRA David</option>
+                        <option value="GONNORD Bertrand">GONNORD Bertrand</option>
+                        <option value="AUGE Ludovic">AUGE Ludovic</option>
+                        <option value="AMAROT Jean-François">AMAROT Jean-François</option>
+                        <option value="UZUN Serhat">UZUN Serhat</option>
+                        <option value="GIESBERS Laurent">GIESBERS Laurent</option>
+                        <option value="BEN AMOR Maroiane">BEN AMOR Maroiane</option>
+                        <option value="CLOVIS Philippe">CLOVIS Philippe</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Date de Création </label>
+                    <input type="text" id="displayTimestamp" readonly style="background-color: #eee; font-style: italic;">
+                </div>
+
+                <div class="form-group">
+                    <label for="editDatePrevue">Date Prévue d'Intervention  <span style="color:red;">*</span></label>
+                    <input type="date" id="editDatePrevue" name="dateDebPres">
+                </div>
+
+                <div class="form-group">
+                    <label for="editComment">Commentaire / Justification </label>
+                    <textarea id="editComment" name="motif Gel"></textarea>
+                </div>
+
+                <button type="submit" class="form-submit-button" style="background-color:#007bff; margin-bottom: 30px;">Enregistrer les Modifications</button>
+            </form>
+            
+            <div class="history-container">
+                <div class="history-header">Historique des Modifications</div>
+                <div id="historyLog">
+                    </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // ************************************************************************************
+        // CONFIGURATION
+        // URL DE VOTRE DÉPLOIEMENT APPS SCRIPT
+        // - Par défaut, la valeur de fallback ci-dessous est utilisée.
+        // - Pour déployer et garder l'URL hors du code source, créez un fichier `config.js`
+        //   à la racine contenant :
+        //     window.__CONFIG__ = { WEB_APP_URL: 'https://script.google.com/macros/s/XXXXX/exec' };
+        //   ou copiez `config.example.js` en `config.js` et modifiez la valeur.
+        // ************************************************************************************
+        const WEB_APP_URL = (window.__CONFIG__ && window.__CONFIG__.WEB_APP_URL) || "https://script.google.com/macros/s/AKfycbxoc_EOEA57sWlVlI9UiRl0hxyrnY-HBGWkwObVYluvFAUw9ZtYuhLIkU0Vu9dHs-IE/exec"; 
+
+        var modal = document.getElementById("otModal");
+        var editModal = document.getElementById("editModal");
+        
+        let fullOTList = [];
+        let activeFilters = {};
+        let currentFilterColumn = null;
+        let currentPage = 1;
+        // Variables de tri
+        let currentSortColumn = null;
+        let currentSortDirection = 'asc'; // 'asc' pour croissant, 'desc' pour décroissant
+
+        // ------------------------------------------------------------------
+        // GESTION DES MODALES
+        // ------------------------------------------------------------------
+        function openModal() { closeModalFilter(); modal.style.display = "block"; }
+        function closeModal() { modal.style.display = "none"; }
+        function closeEditModal() { editModal.style.display = "none"; }
+        
+        function closeModalFilter() {
+            document.getElementById('filterDropdown').style.display = 'none';
+            currentFilterColumn = null;
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+            if (event.target == editModal) {
+                editModal.style.display = "none";
+            }
+            
+            const filterDropdown = document.getElementById('filterDropdown');
+            if (filterDropdown.style.display === 'block' && !filterDropdown.contains(event.target) && !event.target.closest('.filter-btn')) {
+                 closeModalFilter();
+            }
+        }
+        
+        // Fonction pour formater la date pour l'Historique (AVEC HEURE)
+        function formatHistoryDate(isoString) {
+            const date = new Date(isoString);
+            const options = { 
+                day: '2-digit', month: '2-digit', year: 'numeric'
+            };
+            // Format 02/12/2025 11:56
+            return date.toLocaleDateString('fr-FR', options) + ' ' + date.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+        }
+
+        // Fonction pour ouvrir la modale d'édition et pré-remplir les champs
+        function openEditModal(ot) {
+            closeModalFilter();
+            document.getElementById('editRowIndex').value = ot.rowIndex;
+            document.getElementById('editTicketID').textContent = ot.ID || ot.Timestamp.substring(0, 10);
+            
+            // 1. Affichage de la DESCRIPTION
+            document.getElementById('editDescription').value = ot.description || 'Pas de description détaillée.';
+            
+            // 2. Affichage du MAJEUR
+            document.getElementById('editMajeur').value = ot.majeur || ot.Majeur || '';
+
+            // 3. Affichage de la DATE DE CRÉATION (Timestamp - Lecture seule SANS HEURE)
+            const rawTimestamp = ot.Timestamp || 'N/A';
+            let formattedTimestamp = rawTimestamp;
+
+            try {
+                if (rawTimestamp !== 'N/A') {
+                    const date = new Date(rawTimestamp);
+                    const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+                    formattedTimestamp = date.toLocaleDateString('fr-FR', options); 
+                }
+            } catch (e) {
+                formattedTimestamp = rawTimestamp;
+            }
+            document.getElementById('displayTimestamp').value = formattedTimestamp;
+
+
+            // 4. Champs Éditables restants
+            document.getElementById('editStatut').value = ot.Statut || 'À prendre en charge';
+            document.getElementById('editAssignee').value = ot['Exec. Sal.'] || ot['Exec Sal'] || '';
+            document.getElementById('editComment').value = ot['motif Gel'] || '';
+
+            // 5. Date Prévue d'Intervention (dateDebPres)
+            const dateDebPresValue = ot.dateDebPres;
+            if (dateDebPresValue && dateDebPresValue !== '') {
+                document.getElementById('editDatePrevue').value = dateDebPresValue.slice(0, 10);
+            } else {
+                document.getElementById('editDatePrevue').value = '';
+            }
+            
+            // 6. Affichage de l'historique (RÉACTIVATION ET AMÉLIORATION VISUELLE - CHRONOLOGIE)
+            const historyLog = document.getElementById('historyLog');
+            historyLog.innerHTML = ''; 
+            
+            const history = ot.Historique || [];
+            if (history.length === 0) {
+                historyLog.innerHTML = '<div style="text-align:center; color:#888; font-style:italic;">Aucune modification enregistrée pour ce ticket.</div>';
+            } else {
+                
+                const timelineDiv = document.createElement('div');
+                timelineDiv.className = 'history-timeline';
+                
+                // Parcourir l'historique et l'afficher (du plus récent au plus ancien)
+                history.slice().reverse().forEach(entry => {
+                    // Utiliser l'objet Date brut s'il est disponible, sinon la chaîne
+                    const dateHeure = formatHistoryDate(entry.timestamp); 
+                    
+                    let changeText = entry.change;
+                    // Mise en évidence des valeurs modifiées
+                    changeText = changeText.replace(/:\s*\"([^\"]*)\"/g, ': <strong>"$1"</strong>');
+
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'history-entry';
+                    entryDiv.innerHTML = `
+                        <div class="history-meta">
+                            <span>Par: <strong>${entry.user.split('@')[0]}</strong></span>
+                            <span>${dateHeure}</span>
+                        </div>
+                        <div class="history-change">${changeText}</div>
+                    `;
+                    timelineDiv.appendChild(entryDiv);
+                });
+                
+                historyLog.appendChild(timelineDiv);
+            }
+
+            editModal.style.display = "block";
+        }
+
+
+        // ------------------------------------------------------------------
+        // LOGIQUE DE TRI
+        // ------------------------------------------------------------------
+        function sortTable(columnKey) {
+            closeModalFilter(); 
+
+            // 1. Déterminer la direction de tri
+            if (currentSortColumn === columnKey) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = columnKey;
+                currentSortDirection = 'asc';
+            }
+
+            // 2. Fonction de comparaison spécifique pour les dates
+            if (columnKey === 'dateLimite') {
+                const compareDates = (a, b) => {
+                    // Les dates manquantes sont positionnées en fin de liste (valeur très élevée)
+                    const dateA = a[columnKey] ? new Date(a[columnKey]) : new Date('9999-12-31');
+                    const dateB = b[columnKey] ? new Date(b[columnKey]) : new Date('9999-12-31');
+
+                    if (currentSortDirection === 'asc') {
+                        return dateA.getTime() - dateB.getTime();
+                    } else {
+                        return dateB.getTime() - dateA.getTime();
+                    }
+                };
+                fullOTList.sort(compareDates);
+            }
+
+            // 3. Mettre à jour l'affichage
+            filterTable(true); // Redémarre à la première page
+        }
+
+        // ------------------------------------------------------------------
+        // LOGIQUE DE FILTRAGE PAR COLONNE (Excel-like)
+        // ------------------------------------------------------------------
+
+        function getOTValue(ot, key) {
+            let value = ot[key] || '';
+            
+            if (key === 'Exec. Sal.') {
+                value = ot['Exec. Sal.'] || ot['Exec Sal'] || '';
+            }
+            
+            if (key === 'priorite') value = ot.priorite || ot.prio || '';
+            if (key === 'majeur') value = ot.majeur || ot.Majeur || '';
+            if (key === 'Statut') value = ot.Statut || ot.statut || '';
+            
+            return String(value || '(Non renseigné)').trim();
+        }
+
+        function toggleColumnFilter(key, event) {
+            const dropdown = document.getElementById('filterDropdown');
+            const target = event.currentTarget.closest('th'); 
+            
+            if (currentFilterColumn === key) {
+                closeModalFilter();
+                return;
+            }
+
+            currentFilterColumn = key;
+            dropdown.innerHTML = '';
+            
+            const rect = target.getBoundingClientRect();
+            const wrapperRect = document.querySelector('.ot-table-wrapper').getBoundingClientRect();
+            
+            dropdown.style.top = `${rect.bottom - wrapperRect.top}px`;
+            dropdown.style.left = `${rect.left - wrapperRect.left}px`;
+            dropdown.style.display = 'block';
+
+            const uniqueValues = {};
+            fullOTList.forEach(ot => {
+                const value = getOTValue(ot, key);
+                uniqueValues[value] = true;
+            });
+            const sortedValues = Object.keys(uniqueValues).sort();
+
+            let htmlContent = `<div class="filter-header">Filtrer par ${target.textContent.replace('Filtrer', '').trim()}</div>`;
+            
+            htmlContent += `
+                <div class="filter-item">
+                    <input type="checkbox" id="filter-select-all" checked onchange="toggleSelectAll(this, '${key}')">
+                    <label for="filter-select-all">Tout sélectionner</label>
+                </div>
+                <hr style="margin: 5px 0;">
+            `;
+
+            sortedValues.forEach(value => {
+                const isChecked = !activeFilters[key] || activeFilters[key].includes(value);
+                // Utiliser une méthode de nettoyage fiable pour l'ID HTML
+                const id = `filter-${key}-${value.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                
+                htmlContent += `
+                    <div class="filter-item">
+                        <input type="checkbox" id="${id}" value="${value}" ${isChecked ? 'checked' : ''}>
+                        <label for="${id}">${value}</label>
+                    </div>
+                `;
+            });
+            
+            htmlContent += `
+                <div class="filter-actions">
+                    <button class="apply-btn" onclick="applyColumnFilter('${key}')">Appliquer</button>
+                    <button class="clear-btn" onclick="clearColumnFilter('${key}')">Effacer</button>
+                </div>
+            `;
+
+            dropdown.innerHTML = htmlContent;
+        }
+        
+        function toggleSelectAll(checkbox, key) {
+            const dropdown = document.getElementById('filterDropdown');
+            const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]:not(#filter-select-all)');
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+        }
+
+        function applyColumnFilter(key) {
+            const dropdown = document.getElementById('filterDropdown');
+            const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]:not(#filter-select-all):checked');
+            
+            const selectedValues = Array.from(checkboxes).map(cb => cb.value);
+
+            if (selectedValues.length === 0) {
+                activeFilters[key] = []; 
+            } else if (selectedValues.length === fullOTList.length) {
+                delete activeFilters[key]; 
+            } else {
+                activeFilters[key] = selectedValues;
+            }
+
+            closeModalFilter();
+            filterTable();
+        }
+        
+        function clearColumnFilter(key) {
+            delete activeFilters[key];
+            closeModalFilter();
+            filterTable();
+        }
+
+
+        // ------------------------------------------------------------------
+        // FONCTION PRINCIPALE DE FILTRAGE ET RECHERCHE (AVEC PAGINATION)
+        // ------------------------------------------------------------------
+        function filterTable(resetPage = true) {
+            closeModalFilter();
+
+            const searchInput = document.getElementById('searchInput').value.toUpperCase();
+            const tableBody = document.getElementById('otTableBody');
+            tableBody.innerHTML = ''; 
+            
+            if (fullOTList.length === 0) {
+                document.getElementById('paginationInfo').textContent = "0 résultats.";
+                return;
+            }
+
+            // 1. Déterminer les filtres appliqués
+            
+            // Récupérer le statut sélectionné
+            const selectedStatus = document.getElementById('filterStatus').value.toUpperCase();
+
+            const filteredList = fullOTList.filter(ot => {
+                
+                // --- A. FILTRE PAR STATUT (Réactivé) ---
+                if (selectedStatus && selectedStatus !== "") {
+                    const currentStatus = String(ot.Statut || ot.statut || '').toUpperCase().trim();
+                    if (currentStatus !== selectedStatus) {
+                        return false;
+                    }
+                }
+                
+                // --- B. Recherche textuelle globale ---
+                const id = String(ot.ID || ot.Timestamp || '').toUpperCase();
+                const designation = String(ot.designation || ot.Désignation || '').toUpperCase();
+                const siteCode = String(ot.codeSite || ot.CodeSite || ot.siteCode || '').toUpperCase();
+
+                const textMatch = id.includes(searchInput) || 
+                                  designation.includes(searchInput) || 
+                                  siteCode.includes(searchInput);
+
+                if (!textMatch) return false;
+
+                // --- C. Filtres par Colonne (Excel-like) ---
+                for (const key in activeFilters) {
+                    if (activeFilters[key].length === 0) {
+                        return false; 
+                    }
+                    
+                    const otValue = getOTValue(ot, key);
+                    
+                    if (activeFilters[key] && !activeFilters[key].includes(otValue)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+            
+            // 2. LOGIQUE DE PAGINATION
+            const itemsPerPage = parseInt(document.getElementById('itemsPerPage').value) || 10;
+            const totalItems = filteredList.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            
+            if (resetPage) {
+                currentPage = 1;
+            }
+            
+            // S'assurer que la page actuelle est valide
+            if (currentPage > totalPages && totalPages > 0) {
+                currentPage = totalPages;
+            } else if (currentPage <= 0) {
+                currentPage = 1;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+            
+            // Liste à afficher (sous-ensemble)
+            const listToDisplay = filteredList.slice(startIndex, endIndex);
+
+            // 3. Affichage de l'information de pagination
+            document.getElementById('paginationInfo').textContent = 
+                `Affichage des éléments ${startIndex + 1} à ${endIndex} sur ${totalItems} (Page ${currentPage} de ${totalPages || 1})`;
+            
+            // Si la liste filtrée est vide
+            if (filteredList.length === 0) {
+                const colspanCount = 10;
+                tableBody.innerHTML = `<tr><td colspan="${colspanCount}" style="text-align:center; font-style: italic;">Aucun résultat trouvé.</td></tr>`;
+                renderPaginationControls(0); // Cache les contrôles
+                return;
+            }
+
+            // 4. Construire le Tableau
+            listToDisplay.forEach(ot => {
+                
+                const row = tableBody.insertRow();
+                
+                const rawStatus = ot.Statut || 'À définir';
+                
+                // Logique de création de la classe sans accent et sans caractère spécial
+                const statutClass = `status-${rawStatus
+                    .normalize("NFD") 
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^a-zA-Z0-9]/g, '_') 
+                    .replace(/__+/g, '_')
+                }`;
+                
+                const statutRaw = rawStatus.toUpperCase().trim();
+                const statutResolus = ["RÉSOLU", "RESOLU", "TERMINÉ", "TERMINER", "RESOLU.", "ANNULÉ"];
+
+                // Calcul du retard (J+X)
+                const dateLimiteVal = ot.dateLimite ? new Date(ot.dateLimite) : null;
+                const aujourdHui = new Date();
+                aujourdHui.setHours(0, 0, 0, 0); 
+
+                let statutRetard = dateLimiteVal ? dateLimiteVal.toLocaleDateString('fr-FR') : 'N/A';
+                
+                // Calcul des jours de retard : Math.floor() garantit que le retard ne commence qu'à J+1
+                const oneDay = 1000 * 60 * 60 * 24;
+                const daysOverdue = dateLimiteVal 
+                    ? Math.floor((aujourdHui.getTime() - dateLimiteVal.getTime()) / oneDay) 
+                    : 0;
+
+                if (daysOverdue > 0 && !statutResolus.includes(statutRaw)) {
+                    statutRetard = `<span class="retard">J+${daysOverdue}</span>`;
+                }
+                
+                const prioClass = `priority-${ot.priorite || ot.prio || 'P4'}`;
+                const majeurClass = `majeur-${ot.majeur || ot.Majeur || 'RESEAU'}`; 
+                
+                const displayID = ot.ID || ot.Timestamp.substring(0, 10);
+                
+                // Date Prévue 
+                const datePrevue = ot.dateDebPres ? new Date(ot.dateDebPres).toLocaleDateString('fr-FR') : 'N/A';
+                
+                const assignee = ot['Exec. Sal.'] || ot['Exec Sal'] || '(À assigner)';
+
+                row.onclick = () => openEditModal(ot); 
+                row.style.cursor = 'pointer';
+
+                row.innerHTML = `
+                    <td>${displayID}</td>
+                    <td>${ot.designation || ot.Désignation || 'N/A'}</td>
+                    <td>${ot.codeSite || ot.CodeSite || ot.siteCode || 'N/A'}</td>
+                    <td><span class="${prioClass}">${ot.priorite || ot.prio || 'N/A'}</span></td>
+                    <td><span class="${majeurClass}">${ot.majeur || ot.Majeur || 'N/A'}</span></td>
+                    <td><span class="${statutClass}">${rawStatus}</span></td>
+                    <td>${datePrevue}</td>
+                    <td>${statutRetard}</td>
+                    <td>${assignee}</td>
+                    <td onclick="event.stopPropagation();">
+                        <button class="delete-button" onclick="deleteTicket(${ot.rowIndex})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+            });
+            
+            // 5. Affichage des contrôles de pagination
+            renderPaginationControls(totalPages);
+        }
+
+        // Fonction pour générer les boutons de pagination
+        function renderPaginationControls(totalPages) {
+            const controlsContainer = document.getElementById('paginationControls');
+            controlsContainer.innerHTML = '';
+            
+            if (totalPages <= 1) return; 
+            
+            const buttonStyle = 'padding: 8px 12px; border: 1px solid var(--free-primary); border-radius: 4px; background-color: #fff; color: var(--free-primary); cursor: pointer; margin: 0 5px;';
+            const disabledStyle = 'opacity: 0.5; cursor: not-allowed;';
+
+            // Bouton Précédent
+            const prevButton = document.createElement('button');
+            prevButton.textContent = "« Précédent";
+            if (currentPage > 1) {
+                prevButton.onclick = () => { currentPage--; filterTable(false); };
+                prevButton.style.cssText = buttonStyle;
+            } else {
+                prevButton.disabled = true;
+                prevButton.style.cssText = buttonStyle + disabledStyle;
+            }
+            controlsContainer.appendChild(prevButton);
+            
+            // Informations sur la page
+            const pageInfo = document.createElement('span');
+            pageInfo.textContent = ` Page ${currentPage} de ${totalPages} `;
+            pageInfo.style.margin = '0 10px';
+            controlsContainer.appendChild(pageInfo);
+
+            // Bouton Suivant
+            const nextButton = document.createElement('button');
+            nextButton.textContent = "Suivant »";
+            if (currentPage < totalPages) {
+                nextButton.onclick = () => { currentPage++; filterTable(false); };
+                nextButton.style.cssText = buttonStyle;
+            } else {
+                nextButton.disabled = true;
+                nextButton.style.cssText = buttonStyle + disabledStyle;
+            }
+            controlsContainer.appendChild(nextButton);
+        }
+        
+        // ------------------------------------------------------------------
+        // FONCTION DE CHARGEMENT INITIAL
+        // ------------------------------------------------------------------
+        function loadOTList() {
+            const tableBody = document.getElementById('otTableBody');
+            const colspanCount = 10; 
+            tableBody.innerHTML = `<tr><td colspan="${colspanCount}" style="text-align:center; padding: 20px;">Chargement des données...</td></tr>`;
+            
+            fetch(WEB_APP_URL, { method: "GET" })
+            .then(response => response.text())
+            .then(text => {
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error("Erreur de décodage JSON:", text);
+                    document.getElementById('kpiTotal').textContent = 'ERR';
+                    document.getElementById('kpiEnAttente').textContent = 'ERR';
+                    document.getElementById('kpiEnRetard').textContent = 'ERR';
+                    document.getElementById('kpiResolus').textContent = 0; 
+                    throw new Error("Erreur de format de données reçues.");
+                }
+
+                const list = data.list || [];
+                const kpis = data.kpis || {};
+                
+                // Correction KPI: Afficher 0 si le calcul est indisponible.
+                const resolvedKpiValue = (
+                    kpis.otResolusCeMois === 'N/A (Col. Date Rés. Manquante)' || 
+                    kpis.otResolusCeMois === undefined || 
+                    kpis.otResolusCeMois === null
+                ) ? 0 : kpis.otResolusCeMois;
+
+                fullOTList = list;
+                
+                // 1. MISE À JOUR DES CARTES KPI
+                document.getElementById('kpiTotal').textContent = kpis.totalOT || 0;
+                document.getElementById('kpiEnAttente').textContent = kpis.otEnAttenteCloture || 0;
+                document.getElementById('kpiEnRetard').textContent = kpis.otEnRetard || 0;
+                document.getElementById('kpiResolus').textContent = resolvedKpiValue;
+
+                // 2. AFFICHER TOUTES LES DONNÉES (déclenche la pagination et l'affichage des 10 premiers)
+                filterTable(true); 
+            })
+            .catch(error => {
+                console.error('Erreur lors du chargement des OT:', error);
+                tableBody.innerHTML = `<tr><td colspan="${colspanCount}" style="text-align:center; color: red;">Erreur de connexion aux données.</td></tr>`;
+                document.getElementById('kpiResolus').textContent = 0; 
+            });
+        }
+
+
+        // ------------------------------------------------------------------
+        // FONCTION D'ÉCRITURE (AJOUT, SUPPRESSION, UPDATE)
+        // ------------------------------------------------------------------
+        
+        function deleteTicket(rowIndex) {
+            if (!confirm(`Êtes-vous sûr de vouloir supprimer ce ticket (ligne Sheet: ${rowIndex}) ?`)) {
+                return; 
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'delete');
+            formData.append('rowIndex', rowIndex);
+
+            fetch(WEB_APP_URL, { method: "POST", body: formData, mode: 'no-cors' })
+            .then(() => {
+                alert("✅ Ticket supprimé avec succès !");
+                // Recharger en gardant le même filtre/page
+                loadOTList();
+            })
+            .catch(error => {
+                console.error('Erreur lors de la suppression du ticket:', error);
+                alert("❌ Erreur lors de la suppression du ticket.");
+            });
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const data = new FormData(form);
+            data.append('action', 'add'); 
+
+            const submitButton = form.querySelector('.form-submit-button');
+            submitButton.textContent = "Envoi en cours...";
+            submitButton.disabled = true;
+
+            fetch(WEB_APP_URL, { method: "POST", body: data, mode: 'no-cors' })
+            .then(() => {
+                alert("✅ Ticket OT créé avec succès et enregistré dans Google Sheets !");
+                closeModal();
+                form.reset();
+                loadOTList(); 
+            })
+            .catch(error => {
+                console.error('Erreur de connexion:', error);
+                alert("❌ Erreur de connexion ou données non envoyées.");
+            })
+            .finally(() => {
+                submitButton.textContent = "Soumettre le Ticket";
+                submitButton.disabled = false;
+            });
+        }
+        
+        function handleEditSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const data = new FormData(form);
+            
+            data.append('action', 'update');
+            
+            const submitButton = form.querySelector('.form-submit-button');
+            submitButton.textContent = "Mise à jour...";
+            submitButton.disabled = true;
+
+            fetch(WEB_APP_URL, { method: "POST", body: data, mode: 'no-cors' })
+            .then((response) => {
+                alert("✅ Ticket mis à jour avec succès !");
+                closeEditModal();
+                loadOTList(); 
+            })
+            .catch(error => {
+                console.error('Erreur lors de la mise à jour du ticket:', error);
+                alert("❌ Erreur lors de la mise à jour du ticket.");
+            })
+            .finally(() => {
+                submitButton.textContent = "Enregistrer les Modifications";
+                submitButton.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
