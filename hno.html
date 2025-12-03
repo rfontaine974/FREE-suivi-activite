@@ -37,6 +37,10 @@
         .modal-content{background-color:#fefefe;margin:5% auto;padding:30px;border:none;width:90%;max-width:800px;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,0.3)}
         .close-button{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}
         .close-button:hover{color:var(--free-primary)}
+        .history-container{margin-top:16px;padding-top:10px;border-top:1px dashed #ddd}
+        .history-item{padding:8px;background:#fff;border-radius:6px;border:1px solid #eee;margin-bottom:8px}
+        .history-meta{font-size:0.8em;color:#666;margin-bottom:6px}
+        .history-change{font-size:0.9em;color:#333}
         .todo-container{background:#fafafa;border:1px solid #e0e0e0;border-radius:8px;padding:12px;margin-top:8px}
         .todo-input-row{display:flex;gap:8px;margin-bottom:10px}
         .todo-input-row input{flex:1;padding:8px;border:1px solid #ccc;border-radius:6px}
@@ -178,6 +182,10 @@
                 </div>
                 <button type="submit" class="btn" style="width:100%;margin-top:10px;">Enregistrer les Modifications</button>
             </form>
+            <div class="history-container">
+                <h3 style="margin:12px 0 8px 0;">Historique des Modifications</h3>
+                <div id="historyListHNO"></div>
+            </div>
         </div>
     </div>
 
@@ -221,5 +229,157 @@
         window.onclick=function(event){const modal=document.getElementById('editModalHNO');if(event.target==modal){closeEditModalHNO()}}
         document.addEventListener('DOMContentLoaded',render);
     </script>
+<script>
+// --- Historique HNO ---
+function nowIso() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function ensureHistory(ticket) {
+    if (!ticket.history) ticket.history = [];
+}
+
+function addHistory(ticket, type, message, details) {
+    ensureHistory(ticket);
+    ticket.history.unshift({
+        ts: nowIso(),
+        type, // 'create' | 'update'
+        message,
+        details: details || null
+    });
+}
+
+function diffTicket(oldT, newT) {
+    const fields = [
+        {key:'designation', label:'Désignation'},
+        {key:'site', label:'Code Site'},
+        {key:'dateLimite', label:'Date Limite'},
+        {key:'status', label:'Statut du ticket'},
+        {key:'desc', label:'Description'},
+    ];
+    const changes = [];
+    for (const f of fields) {
+        const before = oldT[f.key] ?? '';
+        const after = newT[f.key] ?? '';
+        if (JSON.stringify(before) !== JSON.stringify(after)) {
+            changes.push({ field: f.label, before, after });
+        }
+    }
+    // Todos: compare text + status counts
+    const beforeTodos = Array.isArray(oldT.todoList) ? oldT.todoList : [];
+    const afterTodos = Array.isArray(newT.todoList) ? newT.todoList : [];
+    const beforeSummary = `${beforeTodos.length} tâches`;
+    const afterSummary = `${afterTodos.length} tâches`;
+    if (beforeSummary !== afterSummary) {
+        changes.push({ field: 'Tâches', before: beforeSummary, after: afterSummary });
+    } else {
+        // If same count, detect any status/text change in order
+        const len = Math.max(beforeTodos.length, afterTodos.length);
+        for (let i=0;i<len;i++) {
+            const b = beforeTodos[i];
+            const a = afterTodos[i];
+            const bStr = b ? `${b.text} (${b.status})` : '-';
+            const aStr = a ? `${a.text} (${a.status})` : '-';
+            if (bStr !== aStr) {
+                changes.push({ field: `Tâche ${i+1}`, before: bStr, after: aStr });
+            }
+        }
+    }
+    return changes;
+}
+
+function renderHistory(ticket) {
+    const container = document.getElementById('historyListHNO');
+    if (!container) return;
+    ensureHistory(ticket);
+    if (ticket.history.length === 0) {
+        container.innerHTML = '<div class="history-item"><div class="history-meta">Aucun historique</div></div>';
+        return;
+    }
+    container.innerHTML = ticket.history.map(h => {
+        const details = h.details && Array.isArray(h.details) ? h.details.map(c => `
+            <div class="history-change">
+                <span class="history-field">${c.field}</span>
+                <span class="history-values">${c.before} → ${c.after}</span>
+            </div>
+        `).join('') : '';
+        const typeLabel = h.type === 'create' ? 'Création' : 'Mise à jour';
+        return `
+        <div class="history-item">
+            <div class="history-meta">${typeLabel} • ${h.ts}</div>
+            <div>${h.message || ''}</div>
+            ${details}
+        </div>
+        `;
+    }).join('');
+}
+
+// Hook into existing create/edit flows if present
+const originalHandleHNOFormMain = window.handleHNOFormMain;
+window.handleHNOFormMain = function(event) {
+    if (event) event.preventDefault();
+    const ticket = originalHandleHNOFormMain ? originalHandleHNOFormMain(event) : null;
+    // If original returns ticket or we can access last added via storage
+    try {
+        const list = JSON.parse(localStorage.getItem('hnoTickets')||'[]');
+        const last = list[list.length-1];
+        if (last) {
+            addHistory(last, 'create', 'Ticket créé', [
+                { field: 'Désignation', before: '', after: last.designation||'' },
+                { field: 'Code Site', before: '', after: last.site||'' },
+                { field: 'Date Limite', before: '', after: last.dateLimite||'' },
+                { field: 'Statut du ticket', before: '', after: last.status||'' },
+                { field: 'Description', before: '', after: last.desc||'' },
+                { field: 'Tâches', before: '0 tâches', after: `${Array.isArray(last.todoList)?last.todoList.length:0} tâches` },
+            ]);
+            localStorage.setItem('hnoTickets', JSON.stringify(list));
+        }
+    } catch { /* ignore */ }
+    // Re-render if needed
+    if (window.render) window.render();
+    return ticket;
+};
+
+const originalHandleEditSubmitHNO = window.handleEditSubmitHNO;
+window.handleEditSubmitHNO = function(event) {
+    if (event) event.preventDefault();
+    // Snapshot before
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem('hnoTickets')||'[]'); } catch {}
+    const id = document.getElementById('editHNOId')?.value;
+    const idx = list.findIndex(t => String(t.id) === String(id));
+    const before = idx >= 0 ? JSON.parse(JSON.stringify(list[idx])) : null;
+    const res = originalHandleEditSubmitHNO ? originalHandleEditSubmitHNO(event) : null;
+    // After update
+    try { list = JSON.parse(localStorage.getItem('hnoTickets')||'[]'); } catch {}
+    const after = idx >= 0 ? list[idx] : null;
+    if (before && after) {
+        const details = diffTicket(before, after);
+        if (details.length) {
+            addHistory(after, 'update', 'Ticket mis à jour', details);
+            localStorage.setItem('hnoTickets', JSON.stringify(list));
+        }
+        // Render history in modal
+        renderHistory(after);
+    }
+    // Re-render list if needed
+    if (window.render) window.render();
+    return res;
+};
+
+// When opening modal, ensure history is shown
+const originalOpenEditModalHNO = window.openEditModalHNO;
+window.openEditModalHNO = function(id) {
+    const result = originalOpenEditModalHNO ? originalOpenEditModalHNO(id) : null;
+    try {
+        const list = JSON.parse(localStorage.getItem('hnoTickets')||'[]');
+        const ticket = list.find(t => String(t.id) === String(id));
+        if (ticket) renderHistory(ticket);
+    } catch { /* ignore */ }
+    return result;
+};
+</script>
 </body>
 </html>
