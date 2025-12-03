@@ -114,6 +114,25 @@
             color: var(--free-primary);
             border-color: rgba(0,0,0,0.06);
         }
+        /* Hamburger / responsive nav */
+        .nav-toggle {
+            display: none;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        @media (max-width: 900px) {
+            .nav-tabs { display: none; position: absolute; right: 20px; top: 60px; flex-direction: column; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+            .nav-tabs.show { display: flex; }
+            .nav-toggle { display: inline-block; }
+            header .header-content { align-items: center; }
+            .new-ticket-button { margin-left: 8px; }
+        }
 
         h2 {
             color: var(--free-dark);
@@ -515,6 +534,7 @@
                 <h1 style="font-size: 1.5em; font-weight: 900; margin: 0; padding-left: 20px; border-left: 1px solid rgba(255, 255, 255, 0.5);">Suivi des Ordres de Travaux</h1>
             </div>
             <nav class="main-nav" aria-label="Main menu">
+                <button class="nav-toggle" aria-label="Afficher le menu" onclick="toggleNav()">☰</button>
                 <ul class="nav-tabs">
                     <li><button class="tab-btn active" data-target="tab-suivi" onclick="showTab('tab-suivi')">Suivi OT</button></li>
                     <li><button class="tab-btn" data-target="tab-tools" onclick="showTab('tab-tools')">Outils</button></li>
@@ -881,6 +901,25 @@
                 try { filterTable(true); } catch (e) { console.warn('filterTable not available', e); }
             }
         }
+
+        // Toggle responsive nav (hamburger) on small screens
+        function toggleNav() {
+            const tabs = document.querySelector('.nav-tabs');
+            if (!tabs) return;
+            tabs.classList.toggle('show');
+        }
+
+        // Close responsive nav when clicking outside
+        document.addEventListener('click', (e) => {
+            const tabs = document.querySelector('.nav-tabs');
+            const toggle = document.querySelector('.nav-toggle');
+            if (!tabs || !toggle) return;
+            if (tabs.classList.contains('show')) {
+                if (!tabs.contains(e.target) && !toggle.contains(e.target)) {
+                    tabs.classList.remove('show');
+                }
+            }
+        });
 
         // -----------------------
         // HNO Tracker (localStorage)
