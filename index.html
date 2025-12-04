@@ -1306,7 +1306,7 @@
                 }
 
                 return true;
-            });
+            }).sort((a,b)=>{const dateA=a.dateLimite?new Date(a.dateLimite):new Date('9999-12-31');const dateB=b.dateLimite?new Date(b.dateLimite):new Date('9999-12-31');return dateA.getTime()-dateB.getTime()});
             
             // 2. LOGIQUE DE PAGINATION
             const itemsPerPage = parseInt(document.getElementById('itemsPerPage').value) || 10;
