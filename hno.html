@@ -244,8 +244,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="editHNODesc">Description de l'Intervention (lecture seule)</label>
-                    <textarea id="editHNODesc" rows="8" readonly style="resize:vertical;border:1px solid #ccc;background-color:#fff;padding:10px;"></textarea>
+                    <label>Description de l'Intervention</label>
+                    <div id="editHNODesc" style="padding:12px;background:#fff;border-radius:6px;border:1px solid #eee;min-height:50px;white-space:pre-wrap;word-wrap:break-word;line-height:1.6;font-size:0.95em;"></div>
                 </div>
                 <div class="form-group">
                     <label>Todo Liste</label>
@@ -307,7 +307,7 @@
         function deleteItem(id){if(!confirm('Supprimer ?'))return;saveList(getList().filter(x=>x.id!==id));render()}
         function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[ch])}
         function exportHNOCsvMain(){const l=getList();if(!l.length){alert('Aucun HNO à exporter');return}const headers=['Designation','Code_Site','Date_Limite','Statut','Description','Todo_Tasks','Todo_Completed'];const rows=l.map(i=>{const todoList=i.todoList||[];const tasks=todoList.map(t=>`${t.text} [${t.status}]`).join('; ');const completed=todoList.filter(t=>t.status==='termine').length;return[i.designation||'',i.site,i.dateLimite||'',i.status||'A prendre en charge',i.desc||'',tasks,`${completed}/${todoList.length}`]});const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""') }"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`hno_export_${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
-        function openEditModalHNO(item){document.getElementById('editHNOId').value=item.id;document.getElementById('editHNODesignation').value=item.designation||'';document.getElementById('editHNOSite').value=item.site||'';document.getElementById('editHNODateLimite').value=item.dateLimite||'';document.getElementById('editHNODesc').value=item.desc||'';document.getElementById('editHNOStatusTicket').value=item.status||'A prendre en charge';currentTodoListEdit=item.todoList?JSON.parse(JSON.stringify(item.todoList)):[];renderTodoListEdit();document.getElementById('editModalHNO').style.display='block'}
+        function openEditModalHNO(item){document.getElementById('editHNOId').value=item.id;document.getElementById('editHNODesignation').value=item.designation||'';document.getElementById('editHNOSite').value=item.site||'';document.getElementById('editHNODateLimite').value=item.dateLimite||'';document.getElementById('editHNODesc').textContent=item.desc||'Pas de description.';document.getElementById('editHNOStatusTicket').value=item.status||'A prendre en charge';currentTodoListEdit=item.todoList?JSON.parse(JSON.stringify(item.todoList)):[];renderTodoListEdit();document.getElementById('editModalHNO').style.display='block'}
         function closeEditModalHNO(){document.getElementById('editModalHNO').style.display='none'}
         function addTodoTaskEdit(){const input=document.getElementById('editTodoInputHNO');const text=input.value.trim();if(!text)return;currentTodoListEdit.push({text,status:'a-faire'});input.value='';renderTodoListEdit()}
         function removeTodoTaskEdit(index){currentTodoListEdit.splice(index,1);renderTodoListEdit()}
