@@ -960,6 +960,11 @@
                 <button type="submit" class="form-submit-button">💾 Enregistrer les Modifications</button>
             </form>
             
+            <div style="display:flex;gap:10px;margin-top:15px;padding:15px;background:#f9f9f9;border-radius:8px;border-top:2px solid #e8e8e8;">
+                <button type="button" class="btn" onclick="archiveTicketFromModal()" style="flex:1;background:linear-gradient(135deg,#ffc107 0%,#ff9800 100%);">📦 Archiver ce ticket</button>
+                <button type="button" class="btn" onclick="if(confirm('Êtes-vous sûr de vouloir supprimer ce ticket ?')) deleteTicket(document.getElementById('editRowIndex').value);" style="flex:1;background:linear-gradient(135deg,#dc3545 0%,#c82333 100%);">🗑️ Supprimer</button>
+            </div>
+            
             <div class="history-container">
                 <div class="history-header">📋 Historique Complet</div>
                 <div id="historyLog"></div>
@@ -1440,6 +1445,11 @@
 
             const filteredList = fullOTList.filter(ot => {
                 
+                // --- Exclure les tickets archivés ---
+                if (ot.archived === true || ot.archived === 'true') {
+                    return false;
+                }
+                
                 // --- A. FILTRE PAR STATUT (Réactivé) ---
                 if (selectedStatus && selectedStatus !== "") {
                     const currentStatus = String(ot.Statut || ot.statut || '').toUpperCase().trim();
@@ -1696,6 +1706,43 @@
                 console.error('Erreur lors de la suppression du ticket:', error);
                 alert("❌ Erreur lors de la suppression du ticket.");
             });
+        }
+
+        function archiveTicket(rowIndex) {
+            const ticket = fullOTList.find(ot => ot.rowIndex === rowIndex);
+            if (!ticket) {
+                alert('Ticket non trouvé');
+                return;
+            }
+            
+            if (!confirm(`Êtes-vous sûr de vouloir archiver ce ticket (${ticket.ID}) ? Il ne sera plus affiché dans la liste.`)) {
+                return; 
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'archive');
+            formData.append('rowIndex', rowIndex);
+            formData.append('archived', 'true');
+
+            fetch(WEB_APP_URL, { method: "POST", body: formData, mode: 'no-cors' })
+            .then(() => {
+                alert("✅ Ticket archivé avec succès !");
+                // Marquer localement comme archivé
+                ticket.archived = true;
+                loadOTList();
+            })
+            .catch(error => {
+                console.error('Erreur lors de l\'archivage du ticket:', error);
+                // Marquer localement quand même
+                ticket.archived = true;
+                loadOTList();
+            });
+        }
+
+        function archiveTicketFromModal() {
+            const rowIndex = document.getElementById('editRowIndex').value;
+            closeEditModal();
+            archiveTicket(rowIndex);
         }
 
         function handleFormSubmit(event) {
