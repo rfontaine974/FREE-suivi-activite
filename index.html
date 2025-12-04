@@ -774,6 +774,20 @@
                     </div>
             </div>
             
+            <div class="comment-container" style="margin-top:12px;">
+                <h3 style="margin:12px 0 8px 0;">Ajouter un commentaire</h3>
+                <textarea id="newCommentText" placeholder="Votre commentaire" style="width:100%;min-height:70px;"></textarea>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <input type="text" id="newCommentAuthor" placeholder="Auteur (optionnel)" style="flex:1;">
+                    <button type="button" class="btn" onclick="addCommentOT()" style="flex:0 0 auto;">Ajouter</button>
+                </div>
+            </div>
+            
+            <div class="history-container" style="margin-top:12px;">
+                <div class="history-header">Commentaires Historisés</div>
+                <div id="commentsListOT"></div>
+            </div>
+            
         </div>
     </div>
 
@@ -1102,6 +1116,10 @@
                 
                 historyLog.appendChild(timelineDiv);
             }
+
+            // 7. Affichage des commentaires historisés
+            const ticketId = ot.ID || ot.Timestamp.substring(0, 10);
+            renderCommentsOT(ticketId);
 
             editModal.style.display = "block";
         }
@@ -1585,6 +1603,83 @@
                 submitButton.textContent = "Enregistrer les Modifications";
                 submitButton.disabled = false;
             });
+        }
+
+        // ===== SYSTÈME DE COMMENTAIRES HISTORISÉS =====
+        function nowIso() {
+            return new Date().toISOString();
+        }
+
+        function renderCommentsOT(ticketId) {
+            const container = document.getElementById('commentsListOT');
+            container.innerHTML = '';
+            
+            let comments = [];
+            try {
+                const stored = localStorage.getItem(`ot_comments_${ticketId}`);
+                comments = stored ? JSON.parse(stored) : [];
+            } catch {}
+            
+            if (comments.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#888; font-style:italic;">Aucun commentaire pour ce ticket.</div>';
+                return;
+            }
+            
+            const timelineDiv = document.createElement('div');
+            timelineDiv.className = 'history-timeline';
+            
+            comments.slice().reverse().forEach(entry => {
+                const dateHeure = formatHistoryDate(entry.ts);
+                
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'history-entry';
+                entryDiv.innerHTML = `
+                    <div class="history-meta">
+                        <span>Par: <strong>${entry.author || 'Anonyme'}</strong></span>
+                        <span>${dateHeure}</span>
+                    </div>
+                    <div class="history-change" style="padding:8px;background:#fff;border-radius:6px;border:1px solid #eee;white-space:pre-wrap;word-wrap:break-word;">${escapeHtml(entry.text)}</div>
+                `;
+                timelineDiv.appendChild(entryDiv);
+            });
+            
+            container.appendChild(timelineDiv);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function addCommentOT() {
+            const ticketIdElement = document.getElementById('editTicketID');
+            const ticketId = ticketIdElement ? ticketIdElement.textContent.trim() : '';
+            const text = document.getElementById('newCommentText')?.value?.trim();
+            const author = document.getElementById('newCommentAuthor')?.value?.trim();
+            
+            if (!ticketId || !text) {
+                alert('Veuillez remplir le commentaire et sélectionner un ticket.');
+                return;
+            }
+            
+            let comments = [];
+            try {
+                const stored = localStorage.getItem(`ot_comments_${ticketId}`);
+                comments = stored ? JSON.parse(stored) : [];
+            } catch {}
+            
+            const entry = { ts: nowIso(), author: author || '', text };
+            comments.push(entry);
+            
+            localStorage.setItem(`ot_comments_${ticketId}`, JSON.stringify(comments));
+            
+            // Clear inputs
+            document.getElementById('newCommentText').value = '';
+            document.getElementById('newCommentAuthor').value = '';
+            
+            // Re-render comments
+            renderCommentsOT(ticketId);
         }
     </script>
 </body>
