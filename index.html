@@ -445,6 +445,8 @@
             font-weight: 700;
             text-align: center;
         }
+        @keyframes blink{0%,100%{background-color:#ffe6e6}50%{background-color:#ffcccc}}
+        .row-retard{animation:blink 2s ease-in-out infinite}
         
         /* NOUVEAUX STYLES POUR LA CHRONOLOGIE D'HISTORIQUE */
 
@@ -1373,6 +1375,7 @@
 
                 if (daysOverdue > 0 && !statutResolus.includes(statutRaw)) {
                     statutRetard = `<span class="retard">J+${daysOverdue}</span>`;
+                    row.classList.add('row-retard');
                 }
                 
                 const prioClass = `priority-${ot.priorite || ot.prio || 'P4'}`;
@@ -1391,7 +1394,7 @@
                 row.innerHTML = `
                     <td>${displayID}</td>
                     <td>${ot.designation || ot.Désignation || 'N/A'}</td>
-                    <td>${ot.codeSite || ot.CodeSite || ot.siteCode || 'N/A'}</td>
+                    <td>${(ot.codeSite || ot.CodeSite || ot.siteCode || 'N/A').toUpperCase()}</td>
                     <td><span class="${prioClass}">${ot.priorite || ot.prio || 'N/A'}</span></td>
                     <td><span class="${majeurClass}">${ot.majeur || ot.Majeur || 'N/A'}</span></td>
                     <td><span class="${statutClass}">${rawStatus}</span></td>
@@ -1532,6 +1535,8 @@
             event.preventDefault();
             const form = event.target;
             const data = new FormData(form);
+            const siteCode = form.querySelector('#siteCode').value.trim().toUpperCase();
+            data.set('codeSite', siteCode);
             data.append('action', 'add'); 
 
             const submitButton = form.querySelector('.form-submit-button');
