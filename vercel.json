@@ -2,6 +2,7 @@
   "version": 2,
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
-    { "src": "hno.html", "use": "@vercel/static" }
+    { "src": "hno.html", "use": "@vercel/static" },
+    { "src": "analyse.html", "use": "@vercel/static" }
   ]
 }
