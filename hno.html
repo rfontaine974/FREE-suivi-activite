@@ -288,11 +288,11 @@
                 <button type="submit" class="btn">💾 Enregistrer les Modifications</button>
             </form>
             <div class="history-container">
-                <h3>Historique des Modifications</h3>
+                <h3>📋 Historique Complet</h3>
                 <div id="historyListHNO"></div>
             </div>
             <div class="comment-container">
-                <h3>Ajouter un commentaire</h3>
+                <h3>💬 Ajouter un commentaire</h3>
                 <textarea id="newCommentText" placeholder="Votre commentaire..."></textarea>
                 <div>
                     <input type="text" id="newCommentAuthor" placeholder="Auteur (optionnel)">
@@ -412,27 +412,53 @@ function renderHistory(ticket) {
     if (!container) return;
     ensureHistory(ticket);
     if (ticket.history.length === 0) {
-        container.innerHTML = '<div class="history-item"><div class="history-meta">Aucun historique</div></div>';
+        container.innerHTML = '<div style="text-align:center; color:#888; font-style:italic;">Aucun historique pour ce ticket.</div>';
         return;
     }
-    container.innerHTML = ticket.history.map(h => {
-        const details = h.details && Array.isArray(h.details) ? h.details.map(c => `
-            <div class="history-change">
-                <span class="history-field">${c.field}</span>
-                <span class="history-values">${c.before} → ${c.after}</span>
+    
+    const timelineDiv = document.createElement('div');
+    timelineDiv.className = 'history-timeline';
+    
+    ticket.history.forEach(h => {
+        const entryDiv = document.createElement('div');
+        entryDiv.className = 'history-entry';
+        
+        let icon = '🔄';
+        let label = 'Mise à jour';
+        if (h.type === 'create') {
+            icon = '✅';
+            label = 'Création';
+        } else if (h.type === 'comment') {
+            icon = '💬';
+            label = 'Commentaire';
+        }
+        
+        let html = `
+            <div class="history-meta">
+                <span>${icon} ${label}</span>
+                <span>${h.ts}</span>
             </div>
-        `).join('') : '';
-        let typeLabel = 'Mise à jour';
-        if (h.type === 'create') typeLabel = 'Création';
-        if (h.type === 'comment') typeLabel = 'Commentaire';
-        return `
-        <div class="history-item">
-            <div class="history-meta">${typeLabel} • ${h.ts}</div>
-            <div>${h.message || ''}</div>
-            ${details}
-        </div>
         `;
-    }).join('');
+        
+        if (h.type === 'comment') {
+            html += `<div class="history-change" style="padding:8px;background:#fff;border-radius:6px;border:1px solid #eee;white-space:pre-wrap;word-wrap:break-word;">${escapeHtml(h.message || '')}</div>`;
+        } else if (h.details && Array.isArray(h.details)) {
+            const details = h.details.map(c => `
+                <div class="history-change">
+                    <span style="font-weight:600;">${c.field}:</span> <strong>"${escapeHtml(String(c.before))}"</strong> → <strong>"${escapeHtml(String(c.after))}"</strong>
+                </div>
+            `).join('');
+            html += details;
+        } else if (h.message) {
+            html += `<div class="history-change">${escapeHtml(h.message)}</div>`;
+        }
+        
+        entryDiv.innerHTML = html;
+        timelineDiv.appendChild(entryDiv);
+    });
+    
+    container.innerHTML = '';
+    container.appendChild(timelineDiv);
 }
 
 // Hook into existing create/edit flows if present

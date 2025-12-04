@@ -961,22 +961,17 @@
             </form>
             
             <div class="history-container">
-                <div class="history-header">Historique des Modifications</div>
+                <div class="history-header">📋 Historique Complet</div>
                 <div id="historyLog"></div>
             </div>
             
             <div class="comment-container">
-                <h3>Ajouter un commentaire</h3>
+                <h3>💬 Ajouter un commentaire</h3>
                 <textarea id="newCommentText" placeholder="Votre commentaire..."></textarea>
                 <div>
                     <input type="text" id="newCommentAuthor" placeholder="Auteur (optionnel)">
                     <button type="button" class="btn" onclick="addCommentOT()">💬 Ajouter</button>
                 </div>
-            </div>
-            
-            <div class="history-container">
-                <div class="history-header">Commentaires Historisés</div>
-                <div id="commentsListOT"></div>
             </div>
             
         </div>
@@ -1271,45 +1266,9 @@
                 document.getElementById('editDatePrevue').value = '';
             }
             
-            // 6. Affichage de l'historique (RÉACTIVATION ET AMÉLIORATION VISUELLE - CHRONOLOGIE)
-            const historyLog = document.getElementById('historyLog');
-            historyLog.innerHTML = ''; 
-            
-            const history = ot.Historique || [];
-            if (history.length === 0) {
-                historyLog.innerHTML = '<div style="text-align:center; color:#888; font-style:italic;">Aucune modification enregistrée pour ce ticket.</div>';
-            } else {
-                
-                const timelineDiv = document.createElement('div');
-                timelineDiv.className = 'history-timeline';
-                
-                // Parcourir l'historique et l'afficher (du plus récent au plus ancien)
-                history.slice().reverse().forEach(entry => {
-                    // Utiliser l'objet Date brut s'il est disponible, sinon la chaîne
-                    const dateHeure = formatHistoryDate(entry.timestamp); 
-                    
-                    let changeText = entry.change;
-                    // Mise en évidence des valeurs modifiées
-                    changeText = changeText.replace(/:\s*\"([^\"]*)\"/g, ': <strong>"$1"</strong>');
-
-                    const entryDiv = document.createElement('div');
-                    entryDiv.className = 'history-entry';
-                    entryDiv.innerHTML = `
-                        <div class="history-meta">
-                            <span>Par: <strong>${entry.user.split('@')[0]}</strong></span>
-                            <span>${dateHeure}</span>
-                        </div>
-                        <div class="history-change">${changeText}</div>
-                    `;
-                    timelineDiv.appendChild(entryDiv);
-                });
-                
-                historyLog.appendChild(timelineDiv);
-            }
-
-            // 7. Affichage des commentaires historisés
+            // 6. Affichage de l'historique fusionné avec les commentaires
             const ticketId = ot.ID || ot.Timestamp.substring(0, 10);
-            renderCommentsOT(ticketId);
+            renderMergedHistoryOT(ot, ticketId);
 
             editModal.style.display = "block";
         }
@@ -1800,40 +1759,77 @@
             return new Date().toISOString();
         }
 
-        function renderCommentsOT(ticketId) {
-            const container = document.getElementById('commentsListOT');
-            container.innerHTML = '';
+        function renderMergedHistoryOT(ot, ticketId) {
+            const historyLog = document.getElementById('historyLog');
+            historyLog.innerHTML = '';
             
+            // Récupérer les modifications
+            const history = (ot.Historique || []).map(entry => ({
+                type: 'modification',
+                timestamp: entry.timestamp,
+                user: entry.user,
+                change: entry.change
+            }));
+            
+            // Récupérer les commentaires
             let comments = [];
             try {
                 const stored = localStorage.getItem(`ot_comments_${ticketId}`);
                 comments = stored ? JSON.parse(stored) : [];
             } catch {}
             
-            if (comments.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:#888; font-style:italic;">Aucun commentaire pour ce ticket.</div>';
+            const commentsData = comments.map(entry => ({
+                type: 'commentaire',
+                ts: entry.ts,
+                author: entry.author,
+                text: entry.text
+            }));
+            
+            // Fusionner et trier chronologiquement (plus récent en premier)
+            const merged = [...history, ...commentsData].sort((a, b) => {
+                const timeA = new Date(a.timestamp || a.ts);
+                const timeB = new Date(b.timestamp || b.ts);
+                return timeB - timeA;
+            });
+            
+            if (merged.length === 0) {
+                historyLog.innerHTML = '<div style="text-align:center; color:#888; font-style:italic;">Aucune modification ou commentaire enregistré pour ce ticket.</div>';
                 return;
             }
             
             const timelineDiv = document.createElement('div');
             timelineDiv.className = 'history-timeline';
             
-            comments.slice().reverse().forEach(entry => {
-                const dateHeure = formatHistoryDate(entry.ts);
+            merged.forEach(entry => {
+                const dateHeure = formatHistoryDate(entry.timestamp || entry.ts);
                 
                 const entryDiv = document.createElement('div');
                 entryDiv.className = 'history-entry';
-                entryDiv.innerHTML = `
-                    <div class="history-meta">
-                        <span>Par: <strong>${entry.author || 'Anonyme'}</strong></span>
-                        <span>${dateHeure}</span>
-                    </div>
-                    <div class="history-change" style="padding:8px;background:#fff;border-radius:6px;border:1px solid #eee;white-space:pre-wrap;word-wrap:break-word;">${escapeHtml(entry.text)}</div>
-                `;
+                
+                if (entry.type === 'modification') {
+                    let changeText = entry.change;
+                    changeText = changeText.replace(/:\s*\"([^\"]*)\"/g, ': <strong>"$1"</strong>');
+                    entryDiv.innerHTML = `
+                        <div class="history-meta">
+                            <span>🔄 Modification par: <strong>${entry.user.split('@')[0]}</strong></span>
+                            <span>${dateHeure}</span>
+                        </div>
+                        <div class="history-change">${changeText}</div>
+                    `;
+                } else {
+                    entryDiv.innerHTML = `
+                        <div class="history-meta">
+                            <span>💬 Commentaire par: <strong>${entry.author || 'Anonyme'}</strong></span>
+                            <span>${dateHeure}</span>
+                        </div>
+                        <div class="history-change" style="padding:8px;background:#fff;border-radius:6px;border:1px solid #eee;white-space:pre-wrap;word-wrap:break-word;">${escapeHtml(entry.text)}</div>
+                    `;
+                }
+                
                 timelineDiv.appendChild(entryDiv);
             });
             
-            container.appendChild(timelineDiv);
+            historyLog.appendChild(timelineDiv);
         }
 
         function escapeHtml(text) {
@@ -1868,8 +1864,12 @@
             document.getElementById('newCommentText').value = '';
             document.getElementById('newCommentAuthor').value = '';
             
-            // Re-render comments
-            renderCommentsOT(ticketId);
+            // Re-render merged history
+            const currentOT = {
+                ID: ticketId,
+                Historique: []
+            };
+            renderMergedHistoryOT(currentOT, ticketId);
         }
     </script>
 </body>
