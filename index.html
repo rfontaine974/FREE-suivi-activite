@@ -760,11 +760,6 @@
                     <input type="date" id="editDatePrevue" name="dateDebPres">
                 </div>
 
-                <div class="form-group">
-                    <label for="editComment">Commentaire / Justification </label>
-                    <textarea id="editComment" name="motif Gel"></textarea>
-                </div>
-
                 <button type="submit" class="form-submit-button" style="background-color:#007bff; margin-bottom: 30px;">Enregistrer les Modifications</button>
             </form>
             
@@ -1071,7 +1066,6 @@
             // 4. Champs Éditables restants
             document.getElementById('editStatut').value = ot.Statut || 'À prendre en charge';
             document.getElementById('editAssignee').value = ot['Exec. Sal.'] || ot['Exec Sal'] || '';
-            document.getElementById('editComment').value = ot['motif Gel'] || '';
 
             // 5. Date Prévue d'Intervention (dateDebPres)
             const dateDebPresValue = ot.dateDebPres;
