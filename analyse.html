@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse d'Activité - FREE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+
+    <style>
+        /* Variables de Couleurs FREE */
+        :root {
+            --free-primary: #E80029;
+            --free-dark: #333333;
+            --free-light-bg: #F5F5F5;
+            --free-text-light: #666;
+            --button-bg-light: #FFECEF;
+
+            --p1-color: var(--free-primary);
+            --p2-color: #ffa500;
+            --p3-color: #008000;
+            --p4-color: #808080;
+
+            --status-pending: #ffc107;
+            --status-planned: #17a2b8;
+            --status-stagnant: var(--p1-color);
+            --status-resolved: #28a745;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--free-light-bg);
+            color: var(--free-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--free-primary);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .free-logo-small {
+            height: 28px;
+            filter: grayscale(1) brightness(100);
+            vertical-align: middle;
+        }
+
+        .page-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .nav-toggle {
+            display: inline-block;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .nav-tabs {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: none;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .nav-tabs.show {
+            display: flex;
+        }
+
+        .nav-tabs li {
+            margin: 0;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            opacity: 0.9;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--free-primary);
+            border-color: rgba(0,0,0,0.06);
+        }
+
+        @media (max-width: 900px) {
+            .nav-tabs {
+                display: none;
+                position: absolute;
+                right: 20px;
+                top: 60px;
+                flex-direction: column;
+                background: white;
+                padding: 10px;
+                border-radius: 8px;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            }
+            .nav-tabs.show {
+                display: flex;
+            }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 25px 0;
+        }
+
+        h2 {
+            color: var(--free-dark);
+            font-size: 2em;
+            font-weight: 900;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            text-align: left;
+            padding-left: 20px;
+        }
+
+        h3 {
+            color: var(--free-dark);
+            font-size: 1.3em;
+            font-weight: 700;
+            margin: 20px 0 15px 0;
+        }
+
+        .section-separator {
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 30px;
+        }
+
+        /* Stats Cards Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 0 20px 40px 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-left: 5px solid var(--free-primary);
+            border-radius: 4px;
+            padding: 20px;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+            color: var(--free-text-light);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 900;
+            color: var(--free-dark);
+            margin: 10px 0;
+        }
+
+        .stat-subtitle {
+            font-size: 0.85em;
+            color: var(--free-text-light);
+            margin: 5px 0 0 0;
+        }
+
+        .stat-card.alert {
+            border-left-color: var(--status-stagnant);
+        }
+
+        .stat-card.alert .stat-value {
+            color: var(--status-stagnant);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--status-resolved);
+        }
+
+        .stat-card.success .stat-value {
+            color: var(--status-resolved);
+        }
+
+        /* Charts Container */
+        .charts-section {
+            margin: 0 20px 40px 20px;
+        }
+
+        .chart-wrapper {
+            background: white;
+            border-radius: 4px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        canvas {
+            max-height: 300px;
+        }
+
+        /* Table styles */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .analysis-table thead {
+            background-color: var(--free-primary);
+            color: white;
+        }
+
+        .analysis-table th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .analysis-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .analysis-table tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-resolved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .badge-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-stagnant {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Filters */
+        .filter-section {
+            background: white;
+            padding: 15px 20px;
+            margin: 0 20px 25px 20px;
+            border-radius: 4px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .filter-group button {
+            padding: 6px 15px;
+            background: var(--free-primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+
+        .filter-group button:hover {
+            opacity: 0.9;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 4px;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER avec Navigation -->
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <span class="page-title">📊 Analyse d'Activité</span>
+            </div>
+            <button class="nav-toggle" onclick="toggleNav()" title="Menu de navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-tabs" id="navTabs">
+                <li><a class="tab-btn" href="index.html">📋 OT</a></li>
+                <li><a class="tab-btn" href="hno.html">📝 HNO</a></li>
+                <li><a class="tab-btn active" href="analyse.html">📊 Analyse</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- SECTION OT ANALYSIS -->
+        <h2>📋 Analyse des Ordres de Travaux (OT)</h2>
+        <div class="section-separator"></div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Total OT</h4>
+                <div class="stat-value" id="otTotal">0</div>
+                <p class="stat-subtitle">Tous les tickets OT</p>
+            </div>
+            <div class="stat-card">
+                <h4>OT En Retard</h4>
+                <div class="stat-value alert" id="otOverdue">0</div>
+                <p class="stat-subtitle">Dépassement de délai</p>
+            </div>
+            <div class="stat-card">
+                <h4>OT Résolus</h4>
+                <div class="stat-value success" id="otResolved">0</div>
+                <p class="stat-subtitle">Tickets terminés</p>
+            </div>
+            <div class="stat-card">
+                <h4>Taux de Résolution</h4>
+                <div class="stat-value" id="otResolutionRate">0%</div>
+                <p class="stat-subtitle">Ratio résolu/total</p>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-row">
+                <div class="chart-wrapper">
+                    <h3>Répartition par Statut (OT)</h3>
+                    <canvas id="otStatusChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3>Répartition par Priorité (OT)</h3>
+                    <canvas id="otPriorityChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-row">
+                <div class="chart-wrapper">
+                    <h3>Répartition par Majeur (OT)</h3>
+                    <canvas id="otMajeurChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3>OT par Site</h3>
+                    <canvas id="otSiteChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION HNO ANALYSIS -->
+        <h2>📝 Analyse des HNO (Demandes Internes)</h2>
+        <div class="section-separator"></div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Total HNO</h4>
+                <div class="stat-value" id="hnoTotal">0</div>
+                <p class="stat-subtitle">Tous les tickets HNO</p>
+            </div>
+            <div class="stat-card">
+                <h4>HNO En Cours</h4>
+                <div class="stat-value" id="hnoInProgress">0</div>
+                <p class="stat-subtitle">Actuellement traité</p>
+            </div>
+            <div class="stat-card">
+                <h4>HNO Résolus</h4>
+                <div class="stat-value success" id="hnoResolved">0</div>
+                <p class="stat-subtitle">Tickets terminés</p>
+            </div>
+            <div class="stat-card">
+                <h4>Taux de Résolution</h4>
+                <div class="stat-value" id="hnoResolutionRate">0%</div>
+                <p class="stat-subtitle">Ratio résolu/total</p>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-row">
+                <div class="chart-wrapper">
+                    <h3>Répartition par Statut (HNO)</h3>
+                    <canvas id="hnoStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUMMARY TABLE -->
+        <h2>📈 Résumé Comparatif</h2>
+        <div class="section-separator"></div>
+
+        <div style="margin: 0 20px;">
+            <table class="analysis-table">
+                <thead>
+                    <tr>
+                        <th>Métrique</th>
+                        <th>OT</th>
+                        <th>HNO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Total Tickets</strong></td>
+                        <td id="summaryOTTotal">0</td>
+                        <td id="summaryHNOTotal">0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tickets Résolus</strong></td>
+                        <td id="summaryOTResolved">0</td>
+                        <td id="summaryHNOResolved">0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tickets En Retard</strong></td>
+                        <td id="summaryOTOverdue">0</td>
+                        <td id="summaryHNOOverdue">0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Taux Résolution</strong></td>
+                        <td id="summaryOTRate">0%</td>
+                        <td id="summaryHNORate">0%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwlZ0G3V4fBT7bE9Zj6RVIzQNKGpYEJW1fRJHNvxKKHdKVhXhOcHZh2H6N9_YjmxvXu/usercontent';
+
+        let otCharts = {};
+        let hnoCharts = {};
+
+        // Toggle Navigation
+        function toggleNav() {
+            const navTabs = document.getElementById('navTabs');
+            navTabs.classList.toggle('show');
+        }
+
+        // Load OT Data
+        async function loadOTAnalytics() {
+            try {
+                const response = await fetch(WEB_APP_URL + '?method=get');
+                const data = await response.json();
+                const otList = Array.isArray(data) ? data : [];
+
+                // Filter non-archived tickets
+                const activeOT = otList.filter(ot => ot.archived !== true && ot.archived !== 'true');
+
+                updateOTStats(activeOT);
+                updateOTCharts(activeOT);
+                updateSummary();
+            } catch (error) {
+                console.error('Erreur lors du chargement des OT:', error);
+                document.querySelector('.info-box') || 
+                    (function() {
+                        const box = document.createElement('div');
+                        box.className = 'info-box';
+                        box.textContent = '⚠️ Erreur de connexion aux données OT';
+                        document.querySelector('.container').insertBefore(box, document.querySelector('h2'));
+                    })();
+            }
+        }
+
+        // Load HNO Data
+        function loadHNOAnalytics() {
+            try {
+                const hnoList = JSON.parse(localStorage.getItem('suivi_hno_list_v1') || '[]');
+                const activeHNO = hnoList.filter(hno => hno.archived !== true && hno.archived !== 'true');
+
+                updateHNOStats(activeHNO);
+                updateHNOCharts(activeHNO);
+                updateSummary();
+            } catch (error) {
+                console.error('Erreur lors du chargement des HNO:', error);
+            }
+        }
+
+        // Update OT Statistics
+        function updateOTStats(otList) {
+            const total = otList.length;
+            const resolved = otList.filter(ot => {
+                const status = String(ot.Statut || '').toUpperCase();
+                return ['RÉSOLU', 'RESOLU', 'TERMINÉ', 'TERMINER'].includes(status);
+            }).length;
+            const overdue = otList.filter(ot => {
+                if (!ot.dateLimite) return false;
+                const deadline = new Date(ot.dateLimite);
+                return deadline < new Date();
+            }).length;
+            const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+
+            document.getElementById('otTotal').textContent = total;
+            document.getElementById('otOverdue').textContent = overdue;
+            document.getElementById('otResolved').textContent = resolved;
+            document.getElementById('otResolutionRate').textContent = rate + '%';
+
+            document.getElementById('summaryOTTotal').textContent = total;
+            document.getElementById('summaryOTResolved').textContent = resolved;
+            document.getElementById('summaryOTOverdue').textContent = overdue;
+            document.getElementById('summaryOTRate').textContent = rate + '%';
+
+            window.otStats = { total, resolved, overdue, rate };
+        }
+
+        // Update HNO Statistics
+        function updateHNOStats(hnoList) {
+            const total = hnoList.length;
+            const resolved = hnoList.filter(hno => hno.status === 'Terminé').length;
+            const inProgress = hnoList.filter(hno => hno.status === 'En cours').length;
+            const overdue = hnoList.filter(hno => {
+                if (!hno.dateLimite) return false;
+                const deadline = new Date(hno.dateLimite);
+                return deadline < new Date();
+            }).length;
+            const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+
+            document.getElementById('hnoTotal').textContent = total;
+            document.getElementById('hnoInProgress').textContent = inProgress;
+            document.getElementById('hnoResolved').textContent = resolved;
+            document.getElementById('hnoResolutionRate').textContent = rate + '%';
+
+            document.getElementById('summaryHNOTotal').textContent = total;
+            document.getElementById('summaryHNOResolved').textContent = resolved;
+            document.getElementById('summaryHNOOverdue').textContent = overdue;
+            document.getElementById('summaryHNORate').textContent = rate + '%';
+
+            window.hnoStats = { total, resolved, inProgress, overdue, rate };
+        }
+
+        // Update OT Charts
+        function updateOTCharts(otList) {
+            // Chart 1: Status Distribution
+            const statusMap = {};
+            otList.forEach(ot => {
+                const status = String(ot.Statut || 'À définir').toUpperCase().trim();
+                statusMap[status] = (statusMap[status] || 0) + 1;
+            });
+
+            if (otCharts.status) otCharts.status.destroy();
+            otCharts.status = new Chart(document.getElementById('otStatusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusMap),
+                    datasets: [{
+                        data: Object.values(statusMap),
+                        backgroundColor: [
+                            '#28a745', '#ffc107', '#E80029', '#17a2b8', '#6c757d'
+                        ],
+                        borderColor: 'white',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Chart 2: Priority Distribution
+            const priorityMap = {};
+            otList.forEach(ot => {
+                const priority = String(ot.Priorité || 'P4').trim();
+                priorityMap[priority] = (priorityMap[priority] || 0) + 1;
+            });
+
+            if (otCharts.priority) otCharts.priority.destroy();
+            otCharts.priority = new Chart(document.getElementById('otPriorityChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(priorityMap),
+                    datasets: [{
+                        label: 'Nombre de tickets',
+                        data: Object.values(priorityMap),
+                        backgroundColor: '#E80029',
+                        borderColor: '#c70020',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: true } }
+                }
+            });
+
+            // Chart 3: Majeur Distribution
+            const majeurMap = {};
+            otList.forEach(ot => {
+                const majeur = String(ot.Majeur || 'Autre').trim();
+                majeurMap[majeur] = (majeurMap[majeur] || 0) + 1;
+            });
+
+            if (otCharts.majeur) otCharts.majeur.destroy();
+            otCharts.majeur = new Chart(document.getElementById('otMajeurChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(majeurMap),
+                    datasets: [{
+                        data: Object.values(majeurMap),
+                        backgroundColor: [
+                            '#007bff', '#28a745', '#6c757d', '#ffc107', '#E80029'
+                        ],
+                        borderColor: 'white',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Chart 4: Site Distribution
+            const siteMap = {};
+            otList.forEach(ot => {
+                const site = String(ot.codeSite || ot.CodeSite || 'N/A').toUpperCase().trim();
+                siteMap[site] = (siteMap[site] || 0) + 1;
+            });
+
+            if (otCharts.site) otCharts.site.destroy();
+            otCharts.site = new Chart(document.getElementById('otSiteChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(siteMap),
+                    datasets: [{
+                        label: 'Tickets par site',
+                        data: Object.values(siteMap),
+                        backgroundColor: '#17a2b8',
+                        borderColor: '#0c5460',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: true } }
+                }
+            });
+        }
+
+        // Update HNO Charts
+        function updateHNOCharts(hnoList) {
+            const statusMap = {};
+            hnoList.forEach(hno => {
+                const status = hno.status || 'À prendre en charge';
+                statusMap[status] = (statusMap[status] || 0) + 1;
+            });
+
+            if (hnoCharts.status) hnoCharts.status.destroy();
+            hnoCharts.status = new Chart(document.getElementById('hnoStatusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusMap),
+                    datasets: [{
+                        data: Object.values(statusMap),
+                        backgroundColor: [
+                            '#E80029', '#ffc107', '#28a745', '#17a2b8'
+                        ],
+                        borderColor: 'white',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        // Update Summary
+        function updateSummary() {
+            // Summary is updated in updateOTStats and updateHNOStats
+        }
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOTAnalytics();
+            loadHNOAnalytics();
+
+            // Auto-refresh every 30 seconds
+            setInterval(() => {
+                loadOTAnalytics();
+                loadHNOAnalytics();
+            }, 30000);
+        });
+
+        // Listen for storage changes (from other tabs/windows)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'suivi_hno_list_v1') {
+                loadHNOAnalytics();
+            }
+        });
+    </script>
+</body>
+</html>
