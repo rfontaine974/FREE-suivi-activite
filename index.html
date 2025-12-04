@@ -1234,7 +1234,7 @@
         // Fonction pour ouvrir la modale d'édition et pré-remplir les champs
         function openEditModal(ot) {
             closeModalFilter();
-            document.getElementById('editRowIndex').value = ot.rowIndex;
+            document.getElementById('editRowIndex').value = ot.ID || ot.Timestamp;
             document.getElementById('editTicketID').textContent = ot.ID || ot.Timestamp.substring(0, 10);
             
             // 1. Affichage de la DESCRIPTION
@@ -1708,8 +1708,8 @@
             });
         }
 
-        function archiveTicket(rowIndex) {
-            const ticket = fullOTList.find(ot => ot.rowIndex === rowIndex);
+        function archiveTicket(ticketId) {
+            const ticket = fullOTList.find(ot => (ot.ID || ot.Timestamp) === ticketId);
             if (!ticket) {
                 alert('Ticket non trouvé');
                 return;
@@ -1721,7 +1721,7 @@
 
             const formData = new FormData();
             formData.append('action', 'archive');
-            formData.append('rowIndex', rowIndex);
+            formData.append('ticketId', ticketId);
             formData.append('archived', 'true');
 
             fetch(WEB_APP_URL, { method: "POST", body: formData, mode: 'no-cors' })
