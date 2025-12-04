@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
 
     <style>
         :root {
@@ -450,6 +451,10 @@
                     <i class="fas fa-refresh"></i> Actualiser
                 </button>
             </div>
+            <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+                <span style="font-weight: 600;">📁 Importer :</span>
+                <input type="file" id="excelUpload" accept=".xlsx,.xls" style="cursor: pointer; border: 1px solid var(--border-color); padding: 6px; border-radius: 6px;" onchange="handleExcelUpload(event)">
+            </div>
         </div>
 
         <div class="dashboard-grid">
@@ -615,10 +620,67 @@
 
         let otCharts = {};
         let hnoCharts = {};
+        let excelData = null;
 
         function toggleNav() {
             const navTabs = document.getElementById('navTabs');
             navTabs.classList.toggle('show');
+        }
+
+        // Handle Excel Upload
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Lire toutes les feuilles
+                    excelData = {};
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        excelData[sheetName] = XLSX.utils.sheet_to_json(worksheet);
+                    });
+
+                    console.log('Données Excel chargées:', excelData);
+                    alert('✅ Fichier Excel chargé avec succès !');
+                    
+                    // Mettre à jour les analyses avec les données Excel
+                    updateAnalyticsFromExcel();
+                } catch (error) {
+                    console.error('Erreur lors de la lecture du fichier Excel:', error);
+                    alert('❌ Erreur lors de la lecture du fichier Excel');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Update Analytics from Excel Data
+        function updateAnalyticsFromExcel() {
+            if (!excelData) return;
+
+            // Chercher les feuilles contenant les données
+            const otSheet = Object.keys(excelData).find(name => 
+                name.toLowerCase().includes('ot') || name.toLowerCase().includes('ordre')
+            );
+            const hnoSheet = Object.keys(excelData).find(name => 
+                name.toLowerCase().includes('hno') || name.toLowerCase().includes('demande')
+            );
+
+            if (otSheet) {
+                const otList = excelData[otSheet];
+                updateOTStats(otList);
+                updateOTCharts(otList);
+            }
+
+            if (hnoSheet) {
+                const hnoList = excelData[hnoSheet];
+                updateHNOStats(hnoList);
+                updateHNOCharts(hnoList);
+            }
         }
 
         function filterByType(type) {
@@ -657,15 +719,30 @@
 
         function updateOTStats(otList) {
             const total = otList.length;
+            
+            // Chercher les colonnes pertinentes (flexible)
+            const statusKey = Object.keys(otList[0] || {}).find(k => 
+                k.toLowerCase().includes('statut') || k.toLowerCase().includes('status')
+            ) || 'Statut';
+            
+            const dateKey = Object.keys(otList[0] || {}).find(k => 
+                k.toLowerCase().includes('date') || k.toLowerCase().includes('limite') || k.toLowerCase().includes('deadline')
+            ) || 'dateLimite';
+
             const resolved = otList.filter(ot => {
-                const status = String(ot.Statut || '').toUpperCase();
+                const status = String(ot[statusKey] || ot.Statut || '').toUpperCase();
                 return ['RÉSOLU', 'RESOLU', 'TERMINÉ', 'TERMINER'].includes(status);
             }).length;
+
             const overdue = otList.filter(ot => {
-                if (!ot.dateLimite) return false;
-                const deadline = new Date(ot.dateLimite);
-                return deadline < new Date();
+                const dateVal = ot[dateKey] || ot.dateLimite;
+                if (!dateVal) return false;
+                try {
+                    const deadline = new Date(dateVal);
+                    return deadline < new Date();
+                } catch { return false; }
             }).length;
+
             const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
             document.getElementById('otTotal').textContent = total;
@@ -681,13 +758,33 @@
 
         function updateHNOStats(hnoList) {
             const total = hnoList.length;
-            const resolved = hnoList.filter(hno => hno.status === 'Terminé').length;
-            const inProgress = hnoList.filter(hno => hno.status === 'En cours').length;
-            const overdue = hnoList.filter(hno => {
-                if (!hno.dateLimite) return false;
-                const deadline = new Date(hno.dateLimite);
-                return deadline < new Date();
+            
+            const statusKey = Object.keys(hnoList[0] || {}).find(k => 
+                k.toLowerCase().includes('statut') || k.toLowerCase().includes('status')
+            ) || 'status';
+
+            const resolved = hnoList.filter(hno => {
+                const status = String(hno[statusKey] || hno.status || '');
+                return status === 'Terminé' || status === 'Résolu';
             }).length;
+
+            const inProgress = hnoList.filter(hno => {
+                const status = String(hno[statusKey] || hno.status || '');
+                return status === 'En cours';
+            }).length;
+
+            const overdue = hnoList.filter(hno => {
+                const dateKey = Object.keys(hno).find(k => 
+                    k.toLowerCase().includes('date') || k.toLowerCase().includes('limite')
+                );
+                const dateVal = hno[dateKey] || hno.dateLimite;
+                if (!dateVal) return false;
+                try {
+                    const deadline = new Date(dateVal);
+                    return deadline < new Date();
+                } catch { return false; }
+            }).length;
+
             const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
             document.getElementById('hnoTotal').textContent = total;
@@ -702,10 +799,27 @@
         }
 
         function updateOTCharts(otList) {
+            if (!otList || otList.length === 0) return;
+
+            // Déterminer les clés
+            const firstItem = otList[0];
+            const statusKey = Object.keys(firstItem).find(k => 
+                k.toLowerCase().includes('statut') || k.toLowerCase().includes('status')
+            ) || 'Statut';
+            const priorityKey = Object.keys(firstItem).find(k => 
+                k.toLowerCase().includes('priorit') || k.toLowerCase().includes('priority')
+            ) || 'Priorité';
+            const majeurKey = Object.keys(firstItem).find(k => 
+                k.toLowerCase().includes('majeur')
+            ) || 'Majeur';
+            const siteKey = Object.keys(firstItem).find(k => 
+                k.toLowerCase().includes('site') || k.toLowerCase().includes('code')
+            ) || 'CodeSite';
+
             // Status Chart
             const statusMap = {};
             otList.forEach(ot => {
-                const status = String(ot.Statut || 'À définir').toUpperCase().trim();
+                const status = String(ot[statusKey] || 'À définir').toUpperCase().trim();
                 statusMap[status] = (statusMap[status] || 0) + 1;
             });
 
@@ -727,7 +841,7 @@
             // Priority Chart
             const priorityMap = {};
             otList.forEach(ot => {
-                const priority = String(ot.Priorité || 'P4').trim();
+                const priority = String(ot[priorityKey] || 'P4').trim();
                 priorityMap[priority] = (priorityMap[priority] || 0) + 1;
             });
 
@@ -750,7 +864,7 @@
             // Majeur Chart
             const majeurMap = {};
             otList.forEach(ot => {
-                const majeur = String(ot.Majeur || 'Autre').trim();
+                const majeur = String(ot[majeurKey] || 'Autre').trim();
                 majeurMap[majeur] = (majeurMap[majeur] || 0) + 1;
             });
 
@@ -772,7 +886,7 @@
             // Site Chart
             const siteMap = {};
             otList.forEach(ot => {
-                const site = String(ot.codeSite || ot.CodeSite || 'N/A').toUpperCase().trim();
+                const site = String(ot[siteKey] || 'N/A').toUpperCase().trim();
                 siteMap[site] = (siteMap[site] || 0) + 1;
             });
 
@@ -794,9 +908,15 @@
         }
 
         function updateHNOCharts(hnoList) {
+            if (!hnoList || hnoList.length === 0) return;
+
+            const statusKey = Object.keys(hnoList[0]).find(k => 
+                k.toLowerCase().includes('statut') || k.toLowerCase().includes('status')
+            ) || 'status';
+
             const statusMap = {};
             hnoList.forEach(hno => {
-                const status = hno.status || 'À prendre en charge';
+                const status = hno[statusKey] || hno.status || 'À prendre en charge';
                 statusMap[status] = (statusMap[status] || 0) + 1;
             });
 
