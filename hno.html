@@ -22,13 +22,15 @@
         .new-ticket-button:hover{opacity:0.9}
         .container{width:90%;max-width:1100px;margin:20px auto}
         .card{background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
-        .form-group{margin-bottom:12px}
-        label{display:block;margin-bottom:6px;font-weight:600}
-        input,textarea,select{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px}
-        .row{display:flex;gap:12px;align-items:flex-start}
-        .col{flex:1}
-        .btn{background:var(--free-primary);color:#fff;padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
-        .btn.secondary{background:#eee;color:#333}
+        .form-group{margin-bottom:20px;display:flex;flex-direction:column}
+        label{display:block;margin-bottom:8px;font-weight:600;color:var(--free-dark);font-size:0.95em;letter-spacing:0.3px}
+        input,textarea,select{width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:8px;font-family:Roboto,Arial,sans-serif;font-size:0.95em;transition:all 0.3s ease;background-color:#fff}
+        input:focus,textarea:focus,select:focus{outline:none;border-color:var(--free-primary);box-shadow:0 0 0 3px rgba(232,0,41,0.1);background-color:#fafbfc}
+        .btn{background:linear-gradient(135deg,var(--free-primary) 0%,#c70020 100%);color:#fff;padding:14px 28px;border-radius:8px;border:none;cursor:pointer;font-weight:700;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(232,0,41,0.2);width:100%;margin-top:10px;font-size:1em}
+        .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(232,0,41,0.3)}
+        .btn:active{transform:translateY(0)}
+        .btn.secondary{background:#eee;color:#333;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        .btn.secondary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
         table{width:100%;border-collapse:collapse;margin-top:25px;border:1px solid #eee;box-shadow:0 0 10px rgba(0,0,0,0.05)}
         th,td{padding:12px 18px;text-align:left;border-bottom:1px solid #eee}
         th{background-color:var(--free-primary);color:white;font-weight:700;text-transform:uppercase;font-size:0.8em}
@@ -39,14 +41,26 @@
         .delete-button:hover{color:#c82333}
         tbody tr{cursor:pointer;transition:background-color 0.15s ease-in-out}
         tbody tr:hover{background-color:#e9e9e9 !important}
-        .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,0.6)}
-        .modal-content{background-color:#fefefe;margin:5% auto;padding:30px;border:none;width:90%;max-width:800px;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,0.3)}
-        .close-button{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}
-        .close-button:hover{color:var(--free-primary)}
-        .history-container{margin-top:16px;padding-top:10px;border-top:1px dashed #ddd}
-        .history-item{padding:8px;background:#fff;border-radius:6px;border:1px solid #eee;margin-bottom:8px}
-        .history-meta{font-size:0.8em;color:#666;margin-bottom:6px}
-        .history-change{font-size:0.9em;color:#333}
+        .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,0.4);backdrop-filter:blur(2px)}
+        .modal-content{background:linear-gradient(135deg,#ffffff 0%,#f8f9fa 100%);margin:3% auto;padding:0;border:none;width:90%;max-width:850px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);animation:animatetop 0.4s}
+        @keyframes animatetop{from{top:-300px;opacity:0}to{top:3%;opacity:1}}
+        .modal-content h2{background:linear-gradient(135deg,var(--free-primary) 0%,#c70020 100%);color:#fff;margin:0;padding:25px 30px;font-size:1.5em;border-bottom:none;box-shadow:0 2px 8px rgba(232,0,41,0.2)}
+        .modal-content form{padding:30px}
+        .close-button{position:absolute;right:20px;top:20px;color:#fff;font-size:28px;font-weight:bold;cursor:pointer;z-index:10;transition:transform 0.2s}
+        .close-button:hover{transform:scale(1.2)}
+        .history-container{margin-top:0;padding:25px 30px;border-top:2px solid #e8e8e8;background-color:rgba(232,0,41,0.02)}
+        .history-container h3{color:var(--free-primary);font-size:1.1em;font-weight:700;margin:0 0 20px 0}
+        .history-item{padding:12px;background:#f5f5f5;border-radius:6px;border-left:3px solid var(--free-primary);margin-bottom:12px;font-size:0.9em}
+        .history-meta{font-size:0.8em;color:#666;margin-bottom:6px;font-weight:600}
+        .history-change{font-size:0.9em;color:#333;line-height:1.5}
+        .comment-container{margin-top:0 !important;padding:25px 30px !important;border-top:2px solid #e8e8e8;background-color:rgba(232,0,41,0.02)}
+        .comment-container h3{color:var(--free-primary);font-size:1.1em;font-weight:700;margin:0 0 15px 0}
+        .comment-container textarea{width:100% !important;padding:12px 15px;border:2px solid #e0e0e0;border-radius:8px;font-size:0.95em;min-height:80px;font-family:Roboto,Arial,sans-serif;transition:all 0.3s ease}
+        .comment-container textarea:focus{outline:none;border-color:var(--free-primary);box-shadow:0 0 0 3px rgba(232,0,41,0.1)}
+        .comment-container > div{display:flex;gap:10px;margin-top:12px}
+        .comment-container input{flex:1;padding:12px 15px !important;border:2px solid #e0e0e0 !important;border-radius:8px !important;font-size:0.95em !important;transition:all 0.3s ease !important}
+        .comment-container input:focus{outline:none !important;border-color:var(--free-primary) !important;box-shadow:0 0 0 3px rgba(232,0,41,0.1) !important}
+        .comment-container .btn{flex:0 0 auto;white-space:nowrap;width:auto;padding:12px 24px}
         .todo-container{background:#fafafa;border:1px solid #e0e0e0;border-radius:8px;padding:12px;margin-top:8px}
         .todo-input-row{display:flex;gap:8px;margin-bottom:10px}
         .todo-input-row input{flex:1;padding:8px;border:1px solid #ccc;border-radius:6px}
@@ -166,48 +180,55 @@
     <div id="createModalHNO" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeCreateModalHNO()">&times;</span>
-            <h2 style="text-align:center;border-bottom:2px solid var(--free-primary);padding-bottom:15px;font-weight:700;margin-top:10px;">Créer un Nouveau Ticket HNO</h2>
+            <h2>➕ Créer un Nouveau Ticket HNO</h2>
             <form id="hnoFormMain" onsubmit="handleHNOFormMain(event)">
-                <div class="form-group">
-                    <label for="hnoDesignationMain">Désignation de la Tâche <span style="color:var(--free-primary);">*</span></label>
-                    <input id="hnoDesignationMain" type="text" placeholder="Ex: Maintenance antenne" required>
-                </div>
-                <div class="row">
-                    <div class="col form-group">
-                        <label for="hnoSiteMain">Code Site <span style="color:var(--free-primary);">*</span></label>
-                        <input id="hnoSiteMain" type="text" placeholder="Ex: S1-IDF" required>
+                <div style="margin-bottom:25px;">
+                    <h3 style="color:var(--free-primary);font-size:1em;margin:0 0 15px 0;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">📋 Informations Générales</h3>
+                    <div class="form-group">
+                        <label for="hnoDesignationMain">📝 Désignation de la Tâche <span style="color:var(--free-primary);">*</span></label>
+                        <input id="hnoDesignationMain" type="text" placeholder="Ex: Maintenance antenne" required>
                     </div>
-                    <div class="col form-group">
-                        <label for="hnoDateLimiteMain">Date Limite Souhaitée</label>
-                        <input id="hnoDateLimiteMain" type="date">
+                    <div class="form-group">
+                        <label for="hnoDescMain">📄 Description de l'Intervention</label>
+                        <textarea id="hnoDescMain" placeholder="Détails de l'intervention..."></textarea>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col form-group">
-                        <label for="hnoStatusTicketMain">Statut du Ticket</label>
+                <div style="margin-bottom:25px;">
+                    <h3 style="color:var(--free-primary);font-size:1em;margin:0 0 15px 0;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">🏢 Localisation & Délais</h3>
+                    <div class="row">
+                        <div class="col form-group">
+                            <label for="hnoSiteMain">📍 Code Site <span style="color:var(--free-primary);">*</span></label>
+                            <input id="hnoSiteMain" type="text" placeholder="Ex: S1-IDF" required>
+                        </div>
+                        <div class="col form-group">
+                            <label for="hnoDateLimiteMain">📅 Date Limite Souhaitée</label>
+                            <input id="hnoDateLimiteMain" type="date">
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-bottom:25px;">
+                    <h3 style="color:var(--free-primary);font-size:1em;margin:0 0 15px 0;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">📊 Statut & Tâches</h3>
+                    <div class="form-group">
+                        <label for="hnoStatusTicketMain">✅ Statut du Ticket</label>
                         <select id="hnoStatusTicketMain">
-                            <option value="A prendre en charge">A prendre en charge</option>
-                            <option value="En cours">En cours</option>
-                            <option value="Stagnant">Stagnant</option>
-                            <option value="Terminé">Terminé</option>
+                            <option value="A prendre en charge">🔴 A prendre en charge</option>
+                            <option value="En cours">🟡 En cours</option>
+                            <option value="Stagnant">🟠 Stagnant</option>
+                            <option value="Terminé">🟢 Terminé</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="hnoDescMain">Description de l'Intervention</label>
-                    <textarea id="hnoDescMain" rows="3" placeholder="Détails de l'intervention..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Todo Liste</label>
-                    <div class="todo-container">
-                        <div class="todo-input-row">
-                            <input id="hnoTodoInputMain" type="text" placeholder="Nouvelle tâche...">
-                            <button type="button" class="todo-add-btn" onclick="addTodoTaskMain()">+ Ajouter</button>
+                    <div class="form-group">
+                        <label>✏️ Todo Liste</label>
+                        <div class="todo-container">
+                            <div class="todo-input-row">
+                                <input id="hnoTodoInputMain" type="text" placeholder="Nouvelle tâche...">
+                                <button type="button" class="todo-add-btn" onclick="addTodoTaskMain()">+ Ajouter</button>
+                            </div>
+                            <div id="hnoTodoListMain" class="todo-list"></div>
                         </div>
-                        <div id="hnoTodoListMain" class="todo-list"></div>
                     </div>
                 </div>
-                <button class="btn" type="submit" style="width:100%;margin-top:10px;">Créer le Ticket HNO</button>
+                <button class="btn" type="submit">✅ Créer le Ticket HNO</button>
             </form>
         </div>
     </div>
@@ -215,60 +236,67 @@
     <div id="editModalHNO" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeEditModalHNO()">&times;</span>
-            <h2 style="text-align:center;border-bottom:2px solid var(--free-primary);padding-bottom:15px;font-weight:700;margin-top:10px;">Modifier le Ticket HNO</h2>
+            <h2>✏️ Modifier le Ticket HNO</h2>
             <form id="editFormHNO" onsubmit="handleEditSubmitHNO(event)">
                 <input type="hidden" id="editHNOId">
-                <div class="form-group">
-                    <label for="editHNODesignation">Désignation de la Tâche <span style="color:var(--free-primary);">*</span></label>
-                    <input id="editHNODesignation" type="text" required>
-                </div>
-                <div class="row">
-                    <div class="col form-group">
-                        <label for="editHNOSite">Code Site <span style="color:var(--free-primary);">*</span></label>
-                        <input id="editHNOSite" type="text" required>
+                <div style="margin-bottom:25px;">
+                    <h3 style="color:var(--free-primary);font-size:1em;margin:0 0 15px 0;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">📋 Informations Générales</h3>
+                    <div class="form-group">
+                        <label for="editHNODesignation">📝 Désignation de la Tâche <span style="color:var(--free-primary);">*</span></label>
+                        <input id="editHNODesignation" type="text" required>
                     </div>
-                    <div class="col form-group">
-                        <label for="editHNODateLimite">Date Limite Souhaitée</label>
-                        <input id="editHNODateLimite" type="date">
+                    <div class="form-group">
+                        <label>📄 Description de l'Intervention</label>
+                        <div id="editHNODesc" style="padding:12px;background:#f5f5f5;border-radius:6px;border:1px solid #eee;min-height:50px;white-space:pre-wrap;word-wrap:break-word;line-height:1.6;font-size:0.95em;color:#666;cursor:not-allowed;"></div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col form-group">
-                        <label for="editHNOStatusTicket">Statut du Ticket</label>
+                <div style="margin-bottom:25px;">
+                    <h3 style="color:var(--free-primary);font-size:1em;margin:0 0 15px 0;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">🏢 Localisation & Délais</h3>
+                    <div class="row">
+                        <div class="col form-group">
+                            <label for="editHNOSite">📍 Code Site <span style="color:var(--free-primary);">*</span></label>
+                            <input id="editHNOSite" type="text" required>
+                        </div>
+                        <div class="col form-group">
+                            <label for="editHNODateLimite">📅 Date Limite Souhaitée</label>
+                            <input id="editHNODateLimite" type="date">
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-bottom:25px;">
+                    <h3 style="color:var(--free-primary);font-size:1em;margin:0 0 15px 0;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">📊 Statut & Tâches</h3>
+                    <div class="form-group">
+                        <label for="editHNOStatusTicket">✅ Statut du Ticket</label>
                         <select id="editHNOStatusTicket">
-                            <option value="A prendre en charge">A prendre en charge</option>
-                            <option value="En cours">En cours</option>
-                            <option value="Stagnant">Stagnant</option>
-                            <option value="Terminé">Terminé</option>
+                            <option value="A prendre en charge">🔴 A prendre en charge</option>
+                            <option value="En cours">🟡 En cours</option>
+                            <option value="Stagnant">🟠 Stagnant</option>
+                            <option value="Terminé">🟢 Terminé</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Description de l'Intervention</label>
-                    <div id="editHNODesc" style="padding:12px;background:#fff;border-radius:6px;border:1px solid #eee;min-height:50px;white-space:pre-wrap;word-wrap:break-word;line-height:1.6;font-size:0.95em;"></div>
-                </div>
-                <div class="form-group">
-                    <label>Todo Liste</label>
-                    <div class="todo-container">
-                        <div class="todo-input-row">
-                            <input id="editTodoInputHNO" type="text" placeholder="Nouvelle tâche...">
-                            <button type="button" class="todo-add-btn" onclick="addTodoTaskEdit()">+ Ajouter</button>
+                    <div class="form-group">
+                        <label>✏️ Todo Liste</label>
+                        <div class="todo-container">
+                            <div class="todo-input-row">
+                                <input id="editTodoInputHNO" type="text" placeholder="Nouvelle tâche...">
+                                <button type="button" class="todo-add-btn" onclick="addTodoTaskEdit()">+ Ajouter</button>
+                            </div>
+                            <div id="editTodoListHNO" class="todo-list"></div>
                         </div>
-                        <div id="editTodoListHNO" class="todo-list"></div>
                     </div>
                 </div>
-                <button type="submit" class="btn" style="width:100%;margin-top:10px;">Enregistrer les Modifications</button>
+                <button type="submit" class="btn">💾 Enregistrer les Modifications</button>
             </form>
             <div class="history-container">
-                <h3 style="margin:12px 0 8px 0;">Historique des Modifications</h3>
+                <h3>Historique des Modifications</h3>
                 <div id="historyListHNO"></div>
             </div>
-            <div class="comment-container" style="margin-top:12px;">
-                <h3 style="margin:12px 0 8px 0;">Ajouter un commentaire</h3>
-                <textarea id="newCommentText" placeholder="Votre commentaire" style="width:100%;min-height:70px;"></textarea>
-                <div style="display:flex;gap:8px;margin-top:8px;">
-                    <input type="text" id="newCommentAuthor" placeholder="Auteur (optionnel)" style="flex:1;">
-                    <button type="button" class="btn" onclick="addCommentHNO()" style="flex:0 0 auto;">Ajouter</button>
+            <div class="comment-container">
+                <h3>Ajouter un commentaire</h3>
+                <textarea id="newCommentText" placeholder="Votre commentaire..."></textarea>
+                <div>
+                    <input type="text" id="newCommentAuthor" placeholder="Auteur (optionnel)">
+                    <button type="button" class="btn" onclick="addCommentHNO()">💬 Ajouter</button>
                 </div>
             </div>
         </div>
