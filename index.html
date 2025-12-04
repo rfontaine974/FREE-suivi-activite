@@ -345,82 +345,130 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
         }
 
         .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 30px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            margin: 3% auto;
+            padding: 0;
             border: none;
             width: 90%; 
-            max-width: 800px; 
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 850px; 
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             animation-name: animatetop;
             animation-duration: 0.4s;
+            overflow: hidden;
         }
 
         @keyframes animatetop {
             from {top: -300px; opacity: 0}
-            to {top: 5%; opacity: 1}
+            to {top: 3%; opacity: 1}
+        }
+
+        .modal-content h2 {
+            background: linear-gradient(135deg, var(--free-primary) 0%, #c70020 100%);
+            color: white;
+            margin: 0;
+            padding: 25px 30px;
+            font-size: 1.5em;
+            border-bottom: none;
+            box-shadow: 0 2px 8px rgba(232, 0, 41, 0.2);
+        }
+
+        .modal-content form,
+        .history-container,
+        .comment-container {
+            padding: 30px;
         }
 
         .close-button {
-            color: #aaa;
-            float: right;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            color: white;
             font-size: 28px;
             font-weight: bold;
-            margin-top: -10px;
-            margin-right: -10px;
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.2s;
         }
 
         .close-button:hover,
         .close-button:focus {
-            color: var(--free-primary);
+            transform: scale(1.2);
             text-decoration: none;
-            cursor: pointer;
         }
 
-        /* Formulaire */
+        /* Formulaire amélioré */
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
         }
+
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
+            margin-bottom: 8px;
+            font-weight: 600;
             color: var(--free-dark);
+            font-size: 0.95em;
+            letter-spacing: 0.3px;
         }
+
         .form-group input,
         .form-group textarea,
         .form-group select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
             box-sizing: border-box;
             font-family: 'Roboto', Arial, sans-serif;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            background-color: #ffffff;
         }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--free-primary);
+            box-shadow: 0 0 0 3px rgba(232, 0, 41, 0.1);
+            background-color: #fafbfc;
+        }
+
         .form-group textarea {
             resize: vertical;
             min-height: 100px;
+            font-family: 'Roboto', Arial, sans-serif;
         }
 
         .form-submit-button {
-            background-color: var(--free-primary);
+            background: linear-gradient(135deg, var(--free-primary) 0%, #c70020 100%);
             color: white;
-            padding: 12px 20px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 1em;
             font-weight: 700;
             width: 100%;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(232, 0, 41, 0.2);
+            margin-top: 10px;
         }
+
         .form-submit-button:hover {
-            background-color: #c70020;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 0, 41, 0.3);
+        }
+
+        .form-submit-button:active {
+            transform: translateY(0);
         }
         
         /* Bouton de Suppression */
@@ -435,7 +483,6 @@
         .delete-button:hover {
             color: #c82333;
         }
-        
         /* Style pour l'affichage du Retard J+X */
         .retard {
             color: white; 
@@ -451,64 +498,179 @@
         /* NOUVEAUX STYLES POUR LA CHRONOLOGIE D'HISTORIQUE */
 
         .history-container {
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 2px dashed #ccc;
-            position: relative; /* Conteneur de la chronologie */
+            margin-top: 0;
+            padding: 25px 30px;
+            border-top: 2px solid #e8e8e8;
+            position: relative;
+            background-color: rgba(232, 0, 41, 0.02);
+        }
+
+        .history-header {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--free-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-header:before {
+            content: '\f05b';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 600;
         }
 
         /* Ligne verticale de la chronologie */
         .history-timeline {
-            border-left: 2px solid #ddd;
-            margin-left: 25px; /* Décalage pour aligner la ligne */
-            padding-left: 15px;
+            border-left: 2px solid #e0e0e0;
+            margin-left: 25px;
+            padding-left: 20px;
             padding-bottom: 5px;
         }
 
         .history-entry {
             position: relative;
-            padding: 0 0 20px 20px;
-            margin-bottom: 10px;
+            padding: 12px 0 20px 0;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .history-entry:hover {
+            padding-left: 8px;
         }
 
         /* Cercle de l'événement sur la ligne du temps */
         .history-entry:before {
             content: '';
             position: absolute;
-            left: -13px; /* Aligné sur la ligne verticale */
-            top: 5px;
-            width: 10px;
-            height: 10px;
+            left: -33px;
+            top: 18px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background-color: var(--free-primary); /* Point rouge Free */
-            border: 3px solid #fff; /* Effet 3D sur fond blanc */
-            box-shadow: 0 0 0 1px var(--free-primary);
+            background-color: var(--free-primary);
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 0 2px var(--free-primary);
         }
 
         .history-meta {
             font-size: 0.85em;
-            color: var(--free-text-light);
-            margin-bottom: 5px;
+            color: #888;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
-            font-style: italic;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .history-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .history-meta strong {
+            color: var(--free-primary);
+            font-weight: 600;
         }
 
         .history-change {
             font-size: 0.95em;
             font-weight: 500;
-            color: var(--free-dark);
-            background-color: #f9f9f9;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #eee;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--free-primary);
+            line-height: 1.5;
         }
 
         /* Mise en évidence des mots clés */
         .history-change strong {
             color: var(--free-primary);
         }
-        
+
+        /* Section des commentaires */
+        .comment-container {
+            margin-top: 0 !important;
+            padding: 25px 30px !important;
+            border-top: 2px solid #e8e8e8;
+            background-color: rgba(232, 0, 41, 0.02);
+        }
+
+        .comment-container h3 {
+            color: var(--free-primary);
+            font-size: 1.1em;
+            font-weight: 700;
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comment-container h3:before {
+            content: '\f075';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 600;
+        }
+
+        .comment-container textarea {
+            width: 100% !important;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            min-height: 80px;
+            font-family: 'Roboto', Arial, sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .comment-container textarea:focus {
+            outline: none;
+            border-color: var(--free-primary);
+            box-shadow: 0 0 0 3px rgba(232, 0, 41, 0.1);
+        }
+
+        .comment-container > div {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .comment-container input {
+            flex: 1;
+            padding: 12px 15px !important;
+            border: 2px solid #e0e0e0 !important;
+            border-radius: 8px !important;
+            font-size: 0.95em !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .comment-container input:focus {
+            outline: none !important;
+            border-color: var(--free-primary) !important;
+            box-shadow: 0 0 0 3px rgba(232, 0, 41, 0.1) !important;
+        }
+
+        .comment-container .btn {
+            background: linear-gradient(135deg, var(--free-primary) 0%, #c70020 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(232, 0, 41, 0.2);
+        }
+
+        .comment-container .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 0, 41, 0.3);
+        }
+
         /* Style pour la pagination */
         #paginationControls button {
             background-color: #fff;
@@ -644,57 +806,72 @@
     <div id="otModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal()">&times;</span>
-            <h2 style="text-align: center; border-bottom: 2px solid var(--free-primary); padding-bottom: 15px; font-weight: 700; margin-top: 10px;">Créer un Nouveau Ticket OT</h2>
+            <h2>➕ Créer un Nouveau Ticket OT</h2>
             
             <form id="ticketForm" onsubmit="handleFormSubmit(event)">
-                <div class="form-group">
-                    <label for="id">ID du Ticket (Ex: OT-007) <span style="color:red;">*</span></label>
-                    <input type="text" id="id" name="ID" placeholder="Ex: OT-007" required>
+                <!-- Section 1: Informations de Base -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: var(--free-primary); font-size: 1em; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📋 Informations Générales</h3>
+                    
+                    <div class="form-group">
+                        <label for="id">🆔 ID du Ticket <span style="color:red;">*</span></label>
+                        <input type="text" id="id" name="ID" placeholder="Ex: OT-007" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="designation">📝 Désignation de la Tâche <span style="color:red;">*</span></label>
+                        <input type="text" id="designation" name="designation" placeholder="Brève description de la tâche" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">📄 Description Détaillée du Problème</label>
+                        <textarea id="description" name="description" placeholder="Décrivez le problème en détail..."></textarea>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="designation">Désignation de la Tâche <span style="color:red;">*</span></label>
-                    <input type="text" id="designation" name="designation" required>
+                <!-- Section 2: Localisation et Classification -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: var(--free-primary); font-size: 1em; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">🏢 Localisation & Classification</h3>
+                    
+                    <div class="form-group">
+                        <label for="siteCode">📍 Code Site (Localisation) <span style="color:red;">*</span></label>
+                        <input type="text" id="siteCode" name="codeSite" placeholder="Ex: S1-IDF, B3-Lyon" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="majeur">🔧 Majeur (Service concerné) <span style="color:red;">*</span></label>
+                        <select id="majeur" name="majeur" required>
+                            <option value="">-- Choisir un service --</option>
+                            <option value="RESEAU">🌐 Réseau</option>
+                            <option value="RADIO">📡 Radio</option>
+                            <option value="FIBRE">🔌 Fibre</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="description">Description Détaillée du Problème</label>
-                    <textarea id="description" name="description"></textarea>
+                <!-- Section 3: Priorité et Délais -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: var(--free-primary); font-size: 1em; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">⏰ Priorité & Délais</h3>
+                    
+                    <div class="form-group">
+                        <label for="priorite">🎯 Priorité demandée <span style="color:red;">*</span></label>
+                        <select id="priorite" name="priorite" required>
+                            <option value="">-- Choisir une priorité --</option>
+                            <option value="P1">🔴 P1 (Urgent)</option>
+                            <option value="P2">🟠 P2 (Élevée)</option>
+                            <option value="P3">🟡 P3 (Normale)</option>
+                            <option value="P4">🟢 P4 (Basse)</option>
+                            <option value="Projet">📊 Projet spéciaux</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dateLimite">📅 Date Limite souhaitée</label>
+                        <input type="date" id="dateLimite" name="dateLimite">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="siteCode">Code Site (Localisation) <span style="color:red;">*</span></label>
-                    <input type="text" id="siteCode" name="codeSite" placeholder="Ex: S1-IDF, B3-Lyon" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="majeur">Majeur (Service concerné) <span style="color:red;">*</span></label>
-                    <select id="majeur" name="majeur" required>
-                        <option value="">-- Choisir --</option>
-                        <option value="RESEAU">Réseau</option>
-                        <option value="RADIO">Radio</option>
-                        <option value="FIBRE">Fibre</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="priorite">Priorité demandée <span style="color:red;">*</span></label>
-                    <select id="priorite" name="priorite" required>
-                        <option value="">-- Choisir --</option>
-                        <option value="P1">P1 (Urgent)</option>
-                        <option value="P2">P2 (Élevée)</option>
-                        <option value="P3">P3 (Normale)</option>
-                        <option value="P4">P4 (Basse)</option>
-                        <option value="Projet">Projet spéciaux</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="dateLimite">Date Limite souhaitée</label>
-                    <input type="date" id="dateLimite" name="dateLimite">
-                </div>
-
-                <button type="submit" class="form-submit-button">Soumettre le Ticket</button>
+                <button type="submit" class="form-submit-button">✅ Soumettre le Ticket</button>
             </form>
         </div>
     </div>
@@ -702,83 +879,102 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeEditModal()">&times;</span>
-            <h2 style="text-align: center; border-bottom: 2px solid var(--free-primary); padding-bottom: 15px; font-weight: 700; margin-top: 10px;">Éditer le Ticket <span id="editTicketID" style="color:var(--free-primary);"></span></h2>
+            <h2>✏️ Éditer le Ticket <span id="editTicketID" style="color:white;"></span></h2>
             
             <form id="editForm" onsubmit="handleEditSubmit(event)">
                 <input type="hidden" id="editRowIndex" name="rowIndex">
 
-                <div class="form-group">
-                    <label for="editDescription">Description Détaillée du Problème</label>
-                    <textarea id="editDescription" readonly style="background-color: #eee; font-style: italic;"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editMajeur">Majeur (Service concerné) <span style="color:red;">*</span></label>
-                    <select id="editMajeur" name="majeur" required>
-                        <option value="">-- Choisir --</option>
-                        <option value="RESEAU">Réseau</option>
-                        <option value="RADIO">Radio</option>
-                        <option value="FIBRE">Fibre</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="editStatut">Statut Actuel <span style="color:red;">*</span></label>
-                    <select id="editStatut" name="Statut" required>
-                        <option value="À prendre en charge">À prendre en charge</option>
-                        <option value="Planifié">Planifié</option>
-                        <option value="Stagnant">Stagnant</option>
-                        <option value="Résolu">Résolu</option>
-                        <option value="Annulé">Annulé</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editAssignee">Assigné à :</label>
-                    <select id="editAssignee" name="Exec. Sal.">
-                        <option value="">(À assigner)</option>
-                        <option value="DEVLIN Christophe">DEVLIN Christophe</option>
-                        <option value="KHERBOUCHE Zoubir">KHERBOUCHE Zoubir</option>
-                        <option value="PEREIRA David">PEREIRA David</option>
-                        <option value="GONNORD Bertrand">GONNORD Bertrand</option>
-                        <option value="AUGE Ludovic">AUGE Ludovic</option>
-                        <option value="AMAROT Jean-François">AMAROT Jean-François</option>
-                        <option value="UZUN Serhat">UZUN Serhat</option>
-                        <option value="GIESBERS Laurent">GIESBERS Laurent</option>
-                        <option value="BEN AMOR Maroiane">BEN AMOR Maroiane</option>
-                        <option value="CLOVIS Philippe">CLOVIS Philippe</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Date de Création </label>
-                    <input type="text" id="displayTimestamp" readonly style="background-color: #eee; font-style: italic;">
+                <!-- Section 1: Informations de Base (Lecture seule) -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: var(--free-primary); font-size: 1em; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📋 Informations du Ticket</h3>
+                    
+                    <div class="form-group">
+                        <label for="editDescription">📄 Description Détaillée du Problème</label>
+                        <textarea id="editDescription" readonly style="background-color: #f5f5f5; color: #666; cursor: not-allowed;"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📅 Date de Création </label>
+                        <input type="text" id="displayTimestamp" readonly style="background-color: #f5f5f5; color: #666; cursor: not-allowed;">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="editDatePrevue">Date Prévue d'Intervention  <span style="color:red;">*</span></label>
-                    <input type="date" id="editDatePrevue" name="dateDebPres">
+                <!-- Section 2: Classification et Service -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: var(--free-primary); font-size: 1em; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">🔧 Classification & Service</h3>
+                    
+                    <div class="form-group">
+                        <label for="editMajeur">🔧 Majeur (Service concerné) <span style="color:red;">*</span></label>
+                        <select id="editMajeur" name="majeur" required>
+                            <option value="">-- Choisir un service --</option>
+                            <option value="RESEAU">🌐 Réseau</option>
+                            <option value="RADIO">📡 Radio</option>
+                            <option value="FIBRE">🔌 Fibre</option>
+                        </select>
+                    </div>
                 </div>
 
-                <button type="submit" class="form-submit-button" style="background-color:#007bff; margin-bottom: 30px;">Enregistrer les Modifications</button>
+                <!-- Section 3: Statut et Assignation -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: var(--free-primary); font-size: 1em; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📊 Statut & Assignation</h3>
+                    
+                    <div class="form-group">
+                        <label for="editStatut">✅ Statut Actuel <span style="color:red;">*</span></label>
+                        <select id="editStatut" name="Statut" required>
+                            <option value="À prendre en charge">🔴 À prendre en charge</option>
+                            <option value="Planifié">🟡 Planifié</option>
+                            <option value="Stagnant">🟠 Stagnant</option>
+                            <option value="Résolu">🟢 Résolu</option>
+                            <option value="Annulé">⚫ Annulé</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editAssignee">👤 Assigné à :</label>
+                        <select id="editAssignee" name="Exec. Sal.">
+                            <option value="">(À assigner)</option>
+                            <option value="DEVLIN Christophe">DEVLIN Christophe</option>
+                            <option value="KHERBOUCHE Zoubir">KHERBOUCHE Zoubir</option>
+                            <option value="PEREIRA David">PEREIRA David</option>
+                            <option value="GONNORD Bertrand">GONNORD Bertrand</option>
+                            <option value="AUGE Ludovic">AUGE Ludovic</option>
+                            <option value="AMAROT Jean-François">AMAROT Jean-François</option>
+                            <option value="UZUN Serhat">UZUN Serhat</option>
+                            <option value="GIESBERS Laurent">GIESBERS Laurent</option>
+                            <option value="BEN AMOR Maroiane">BEN AMOR Maroiane</option>
+                            <option value="CLOVIS Philippe">CLOVIS Philippe</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Section 4: Délais -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: var(--free-primary); font-size: 1em; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">⏰ Délais</h3>
+                    
+                    <div class="form-group">
+                        <label for="editDatePrevue">📅 Date Prévue d'Intervention  <span style="color:red;">*</span></label>
+                        <input type="date" id="editDatePrevue" name="dateDebPres">
+                    </div>
+                </div>
+
+                <button type="submit" class="form-submit-button">💾 Enregistrer les Modifications</button>
             </form>
             
             <div class="history-container">
                 <div class="history-header">Historique des Modifications</div>
-                <div id="historyLog">
-                    </div>
+                <div id="historyLog"></div>
             </div>
             
-            <div class="comment-container" style="margin-top:12px;">
-                <h3 style="margin:12px 0 8px 0;">Ajouter un commentaire</h3>
-                <textarea id="newCommentText" placeholder="Votre commentaire" style="width:100%;min-height:70px;"></textarea>
-                <div style="display:flex;gap:8px;margin-top:8px;">
-                    <input type="text" id="newCommentAuthor" placeholder="Auteur (optionnel)" style="flex:1;">
-                    <button type="button" class="btn" onclick="addCommentOT()" style="flex:0 0 auto;">Ajouter</button>
+            <div class="comment-container">
+                <h3>Ajouter un commentaire</h3>
+                <textarea id="newCommentText" placeholder="Votre commentaire..."></textarea>
+                <div>
+                    <input type="text" id="newCommentAuthor" placeholder="Auteur (optionnel)">
+                    <button type="button" class="btn" onclick="addCommentOT()">💬 Ajouter</button>
                 </div>
             </div>
             
-            <div class="history-container" style="margin-top:12px;">
+            <div class="history-container">
                 <div class="history-header">Commentaires Historisés</div>
                 <div id="commentsListOT"></div>
             </div>
